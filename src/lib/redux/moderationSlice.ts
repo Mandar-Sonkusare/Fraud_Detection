@@ -189,7 +189,7 @@ export const moderationSlice = createSlice({
       if (!state.posts.some(p => p.id === action.payload.id)) {
         // Check if user is in whitelist or blacklist
         const username = action.payload.username;
-        let status = 'pending';
+        let status: 'pending' | 'approved' | 'rejected' = 'pending';
         
         if (state.whitelist.includes(username)) {
           status = 'approved';
