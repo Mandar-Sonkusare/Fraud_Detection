@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Card, CardContent, CardDescription, CardHeader, CardTitle 
 } from "@/components/ui/card";
@@ -14,14 +14,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { 
-  AlertSeverity, ContentCategory, Post, categoryIcons, categoryNames, 
-  generateMockPosts 
+  ContentCategory, Post, categoryIcons, categoryNames
 } from "@/lib/mock-data";
 import { useToast } from "@/hooks/use-toast";
 import { 
   ChevronDown, Filter, Search, Check, X, AlertTriangle, 
   MoreHorizontal, Twitter, Facebook, Instagram, ArrowUpDown
 } from "lucide-react";
+import { useAppSelector, useAppDispatch } from '@/lib/redux/hooks';
+import { bulkApprove, bulkReject } from '@/lib/redux/moderationSlice';
+import ModerateButtons from '@/components/moderation/ModerateButtons';
+import { startTwitterPolling, stopTwitterPolling } from '@/lib/api/xApi';
 
 // Convert date to relative time string
 const getRelativeTime = (date: Date) => {
@@ -55,7 +58,7 @@ const PlatformIcon = ({ platform }: { platform: Post['platform'] }) => {
 };
 
 // Severity badge component
-const SeverityBadge = ({ severity }: { severity: AlertSeverity }) => {
+const SeverityBadge = ({ severity }: { severity: Post['severity'] }) => {
   const colors = {
     low: "bg-alert-low/10 text-alert-low border-alert-low/30",
     medium: "bg-alert-medium/10 text-alert-medium border-alert-medium/30",
@@ -81,7 +84,7 @@ const CategoryBadge = ({ category }: { category: ContentCategory }) => {
 };
 
 // Post card component
-const PostCard = ({ post, onAction }: { post: Post, onAction: (id: string, action: 'approve' | 'reject') => void }) => {
+const PostCard = ({ post }: { post: Post }) => {
   return (
     <Card className="mb-4 relative overflow-hidden">
       <div className={`absolute top-0 left-0 w-1 h-full ${
@@ -149,42 +152,7 @@ const PostCard = ({ post, onAction }: { post: Post, onAction: (id: string, actio
             View Details
           </Button>
           
-          <div className="flex items-center gap-2">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="bg-green-500/10 text-green-500 hover:bg-green-500/20 hover:text-green-500"
-              onClick={() => onAction(post.id, 'approve')}
-            >
-              <Check className="mr-1 h-3 w-3" />
-              Approve
-            </Button>
-            <Button 
-              variant="outline" 
-              size="sm"
-              className="bg-alert-high/10 text-alert-high hover:bg-alert-high/20 hover:text-alert-high"
-              onClick={() => onAction(post.id, 'reject')}
-            >
-              <X className="mr-1 h-3 w-3" />
-              Reject
-            </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem>
-                  <AlertTriangle className="mr-2 h-4 w-4" />
-                  <span>Retrain AI with this post</span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>Add to whitelist</DropdownMenuItem>
-                <DropdownMenuItem>Add to blacklist</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+          <ModerateButtons postId={post.id} username={post.username} />
         </div>
       </CardContent>
     </Card>
@@ -194,13 +162,23 @@ const PostCard = ({ post, onAction }: { post: Post, onAction: (id: string, actio
 // Main component
 const ModerationQueue = () => {
   const { toast } = useToast();
+  const dispatch = useAppDispatch();
+  const posts = useAppSelector(state => state.moderation.posts);
+  
   const [filter, setFilter] = useState<string>('all');
   const [search, setSearch] = useState<string>('');
-  const [allPosts, setAllPosts] = useState<Post[]>(generateMockPosts(30));
   const [selectedPosts, setSelectedPosts] = useState<string[]>([]);
   
+  // Start polling X API when component mounts
+  useEffect(() => {
+    startTwitterPolling();
+    return () => {
+      stopTwitterPolling();
+    };
+  }, []);
+  
   // Filter posts based on status and search
-  const filteredPosts = allPosts.filter(post => {
+  const filteredPosts = posts.filter(post => {
     const matchesFilter = filter === 'all' || post.status === filter;
     const matchesSearch = search === '' || 
       post.content.toLowerCase().includes(search.toLowerCase()) ||
@@ -211,25 +189,9 @@ const ModerationQueue = () => {
   });
   
   // Count posts by status
-  const pendingCount = allPosts.filter(p => p.status === 'pending').length;
-  const approvedCount = allPosts.filter(p => p.status === 'approved').length;
-  const rejectedCount = allPosts.filter(p => p.status === 'rejected').length;
-  
-  // Action handler for approving/rejecting posts
-  const handleAction = (id: string, action: 'approve' | 'reject') => {
-    setAllPosts(posts => 
-      posts.map(post => 
-        post.id === id 
-          ? { ...post, status: action === 'approve' ? 'approved' : 'rejected' } 
-          : post
-      )
-    );
-    
-    toast({
-      title: action === 'approve' ? "Post Approved" : "Post Rejected",
-      description: `The post has been ${action === 'approve' ? 'approved' : 'rejected'} and will be used for AI training.`,
-    });
-  };
+  const pendingCount = posts.filter(p => p.status === 'pending').length;
+  const approvedCount = posts.filter(p => p.status === 'approved').length;
+  const rejectedCount = posts.filter(p => p.status === 'rejected').length;
   
   // Handle bulk actions
   const handleBulkAction = (action: 'approve' | 'reject') => {
@@ -242,13 +204,11 @@ const ModerationQueue = () => {
       return;
     }
     
-    setAllPosts(posts => 
-      posts.map(post => 
-        selectedPosts.includes(post.id) 
-          ? { ...post, status: action === 'approve' ? 'approved' : 'rejected' } 
-          : post
-      )
-    );
+    if (action === 'approve') {
+      dispatch(bulkApprove(selectedPosts));
+    } else {
+      dispatch(bulkReject(selectedPosts));
+    }
     
     toast({
       title: `${selectedPosts.length} Posts ${action === 'approve' ? 'Approved' : 'Rejected'}`,
@@ -275,6 +235,13 @@ const ModerationQueue = () => {
       setSelectedPosts([...selectedPosts, id]);
     }
   };
+  
+  const handleRefresh = () => {
+    startTwitterPolling();
+    toast('Refreshing content', {
+      description: 'Fetching new content from social media platforms'
+    });
+  };
 
   return (
     <div className="space-y-6">
@@ -285,7 +252,7 @@ const ModerationQueue = () => {
           <Button variant="outline" size="sm">
             Export
           </Button>
-          <Button variant="default" size="sm">
+          <Button variant="default" size="sm" onClick={handleRefresh}>
             Refresh
           </Button>
         </div>
@@ -349,7 +316,7 @@ const ModerationQueue = () => {
           <Tabs defaultValue="all" className="mb-6">
             <TabsList>
               <TabsTrigger value="all">
-                All <Badge variant="secondary" className="ml-2">{allPosts.length}</Badge>
+                All <Badge variant="secondary" className="ml-2">{posts.length}</Badge>
               </TabsTrigger>
               <TabsTrigger value="pending">
                 Pending <Badge variant="secondary" className="ml-2">{pendingCount}</Badge>
@@ -404,7 +371,7 @@ const ModerationQueue = () => {
                     />
                   </div>
                   <div className="flex-1">
-                    <PostCard post={post} onAction={handleAction} />
+                    <PostCard post={post} />
                   </div>
                 </div>
               ))}
@@ -433,7 +400,7 @@ const ModerationQueue = () => {
                     />
                   </div>
                   <div className="flex-1">
-                    <PostCard post={post} onAction={handleAction} />
+                    <PostCard post={post} />
                   </div>
                 </div>
               ))}
@@ -450,7 +417,7 @@ const ModerationQueue = () => {
                     />
                   </div>
                   <div className="flex-1">
-                    <PostCard post={post} onAction={handleAction} />
+                    <PostCard post={post} />
                   </div>
                 </div>
               ))}
@@ -467,7 +434,7 @@ const ModerationQueue = () => {
                     />
                   </div>
                   <div className="flex-1">
-                    <PostCard post={post} onAction={handleAction} />
+                    <PostCard post={post} />
                   </div>
                 </div>
               ))}

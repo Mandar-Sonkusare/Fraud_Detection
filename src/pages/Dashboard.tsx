@@ -1,28 +1,38 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { 
   Card, CardContent, CardDescription, CardHeader, CardTitle 
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { generateMockPosts, generateMockStats } from '@/lib/mock-data';
+import { generateMockStats } from '@/lib/mock-data';
 import { Badge } from '@/components/ui/badge';
 import { ArrowDown, ArrowUp, BarChart3, Clock, Shield } from 'lucide-react';
 import { 
   AreaChart, Area, BarChart as RechartBarChart, Bar, XAxis, YAxis, 
   CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, TooltipProps 
 } from 'recharts';
+import { useAppSelector } from '@/lib/redux/hooks';
+import { startTwitterPolling } from '@/lib/api/xApi';
 
 const Dashboard = () => {
   const stats = generateMockStats();
+  const moderationStats = useAppSelector(state => state.moderation.stats);
+  const posts = useAppSelector(state => state.moderation.posts);
   
-  // Format data for recharts
-  const dailyTrendData = stats.dailyTrends.map(day => ({
-    name: day.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-    flagged: day.flagged,
-    resolved: day.resolved
-  }));
+  // Start Twitter polling when dashboard loads
+  useEffect(() => {
+    startTwitterPolling();
+  }, []);
   
-  const categoryData = Object.entries(stats.flaggedByCategory).map(([category, count]) => ({
+  // Calculate category data from real posts
+  const categoryCountMap: Record<string, number> = {};
+  posts.forEach(post => {
+    if (post.category) {
+      categoryCountMap[post.category] = (categoryCountMap[post.category] || 0) + 1;
+    }
+  });
+  
+  const categoryData = Object.entries(categoryCountMap).map(([category, count]) => ({
     name: category
       .split('_')
       .map(word => word.charAt(0).toUpperCase() + word.slice(1))
@@ -30,15 +40,47 @@ const Dashboard = () => {
     value: count
   }));
   
-  const platformData = Object.entries(stats.flaggedByPlatform).map(([platform, count]) => ({
+  // Calculate platform data from real posts
+  const platformCountMap: Record<string, number> = {};
+  posts.forEach(post => {
+    platformCountMap[post.platform] = (platformCountMap[post.platform] || 0) + 1;
+  });
+  
+  const platformData = Object.entries(platformCountMap).map(([platform, count]) => ({
     name: platform.charAt(0).toUpperCase() + platform.slice(1),
     value: count
   }));
   
-  const severityData = Object.entries(stats.flaggedBySeverity).map(([severity, count]) => ({
+  // Calculate severity data from real posts
+  const severityCountMap: Record<string, number> = {};
+  posts.forEach(post => {
+    severityCountMap[post.severity] = (severityCountMap[post.severity] || 0) + 1;
+  });
+  
+  const severityData = Object.entries(severityCountMap).map(([severity, count]) => ({
     name: severity.charAt(0).toUpperCase() + severity.slice(1),
     value: count
   }));
+  
+  // Format data for recharts: last 7 days of data
+  const today = new Date();
+  const dailyTrendData = Array.from({ length: 7 }, (_, i) => {
+    const date = new Date(today);
+    date.setDate(today.getDate() - (6 - i));
+    
+    // Count posts for this day
+    const dayStr = date.toISOString().split('T')[0];
+    const dayPosts = posts.filter(p => {
+      const postDate = new Date(p.timestamp);
+      return postDate.toISOString().split('T')[0] === dayStr;
+    });
+    
+    return {
+      name: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      flagged: dayPosts.length,
+      resolved: dayPosts.filter(p => p.status === 'approved' || p.status === 'rejected').length
+    };
+  });
   
   // Colors for pie charts
   const SEVERITY_COLORS = ['#33C3F0', '#F97316', '#ea384c'];
@@ -68,9 +110,9 @@ const Dashboard = () => {
             <Shield className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalFlagged.toLocaleString()}</div>
+            <div className="text-2xl font-bold">{moderationStats.totalFlagged.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground">
-              Last 30 days
+              All time
             </p>
           </CardContent>
         </Card>
@@ -83,11 +125,11 @@ const Dashboard = () => {
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.pending.toLocaleString()}</div>
+            <div className="text-2xl font-bold">{moderationStats.pending.toLocaleString()}</div>
             <div className="flex items-center gap-1 text-xs">
               <Badge variant="outline" className="bg-alert-medium/10 text-alert-medium border-alert-medium/20">
                 <ArrowUp className="mr-1 h-3 w-3" />
-                +12% from yesterday
+                +{Math.round(moderationStats.pending / (moderationStats.totalFlagged || 1) * 100)}% of total
               </Badge>
             </div>
           </CardContent>
@@ -101,11 +143,13 @@ const Dashboard = () => {
             <BarChart3 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{Math.round(stats.resolved / stats.totalFlagged * 100)}%</div>
+            <div className="text-2xl font-bold">
+              {Math.round((moderationStats.approved + moderationStats.rejected) / (moderationStats.totalFlagged || 1) * 100)}%
+            </div>
             <div className="flex items-center gap-1 text-xs">
               <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/20">
                 <ArrowUp className="mr-1 h-3 w-3" />
-                +4% from last week
+                Updated in real-time
               </Badge>
             </div>
           </CardContent>
@@ -114,16 +158,16 @@ const Dashboard = () => {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Avg. Resolution Time
+              Approval Rate
             </CardTitle>
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.moderationStats.averageResolutionTime} min</div>
+            <div className="text-2xl font-bold">{Math.round(moderationStats.approvalRate * 100)}%</div>
             <div className="flex items-center gap-1 text-xs">
               <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/20">
                 <ArrowDown className="mr-1 h-3 w-3" />
-                -2.3 min from last week
+                Rejection: {Math.round(moderationStats.rejectionRate * 100)}%
               </Badge>
             </div>
           </CardContent>
@@ -142,7 +186,7 @@ const Dashboard = () => {
             <CardHeader>
               <CardTitle>Daily Trends</CardTitle>
               <CardDescription>
-                Flagged content vs resolved over the last 7 days
+                Flagged content vs resolved over time
               </CardDescription>
             </CardHeader>
             <CardContent className="h-80">
@@ -239,8 +283,8 @@ const Dashboard = () => {
                 <ResponsiveContainer width="100%" height="100%">
                   <RechartBarChart
                     data={[
-                      { name: 'Approval Rate', value: stats.moderationStats.approvalRate * 100 },
-                      { name: 'Rejection Rate', value: stats.moderationStats.rejectionRate * 100 },
+                      { name: 'Approval Rate', value: moderationStats.approvalRate * 100 },
+                      { name: 'Rejection Rate', value: moderationStats.rejectionRate * 100 },
                     ]}
                     margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
                   >
