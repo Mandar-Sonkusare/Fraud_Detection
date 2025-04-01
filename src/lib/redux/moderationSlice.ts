@@ -44,30 +44,50 @@ export const moderationSlice = createSlice({
   reducers: {
     approvePost: (state, action: PayloadAction<string>) => {
       const post = state.posts.find(p => p.id === action.payload);
-      if (post && post.status !== 'approved') {
-        post.status = 'approved';
-        state.stats.approved++;
-        if (post.status === 'pending') {
-          state.stats.pending--;
-        } else if (post.status === 'rejected') {
-          state.stats.rejected--;
+      if (post) {
+        // Store the original status before updating
+        const originalStatus = post.status;
+        
+        // Only proceed if not already approved
+        if (originalStatus !== 'approved') {
+          post.status = 'approved';
+          state.stats.approved++;
+          
+          // Decrement the appropriate counter based on original status
+          if (originalStatus === 'pending') {
+            state.stats.pending--;
+          } else if (originalStatus === 'rejected') {
+            state.stats.rejected--;
+          }
+          
+          // Update rates
+          state.stats.approvalRate = state.stats.approved / state.stats.totalFlagged;
+          state.stats.rejectionRate = state.stats.rejected / state.stats.totalFlagged;
         }
-        state.stats.approvalRate = state.stats.approved / state.stats.totalFlagged;
-        state.stats.rejectionRate = state.stats.rejected / state.stats.totalFlagged;
       }
     },
     rejectPost: (state, action: PayloadAction<string>) => {
       const post = state.posts.find(p => p.id === action.payload);
-      if (post && post.status !== 'rejected') {
-        post.status = 'rejected';
-        state.stats.rejected++;
-        if (post.status === 'pending') {
-          state.stats.pending--;
-        } else if (post.status === 'approved') {
-          state.stats.approved--;
+      if (post) {
+        // Store the original status before updating
+        const originalStatus = post.status;
+        
+        // Only proceed if not already rejected
+        if (originalStatus !== 'rejected') {
+          post.status = 'rejected';
+          state.stats.rejected++;
+          
+          // Decrement the appropriate counter based on original status
+          if (originalStatus === 'pending') {
+            state.stats.pending--;
+          } else if (originalStatus === 'approved') {
+            state.stats.approved--;
+          }
+          
+          // Update rates
+          state.stats.approvalRate = state.stats.approved / state.stats.totalFlagged;
+          state.stats.rejectionRate = state.stats.rejected / state.stats.totalFlagged;
         }
-        state.stats.approvalRate = state.stats.approved / state.stats.totalFlagged;
-        state.stats.rejectionRate = state.stats.rejected / state.stats.totalFlagged;
       }
     },
     addToWhitelist: (state, action: PayloadAction<string>) => {
@@ -103,13 +123,21 @@ export const moderationSlice = createSlice({
     bulkApprove: (state, action: PayloadAction<string[]>) => {
       action.payload.forEach(id => {
         const post = state.posts.find(p => p.id === id);
-        if (post && post.status !== 'approved') {
-          post.status = 'approved';
-          state.stats.approved++;
-          if (post.status === 'pending') {
-            state.stats.pending--;
-          } else if (post.status === 'rejected') {
-            state.stats.rejected--;
+        if (post) {
+          // Store the original status before updating
+          const originalStatus = post.status;
+          
+          // Only proceed if not already approved
+          if (originalStatus !== 'approved') {
+            post.status = 'approved';
+            state.stats.approved++;
+            
+            // Decrement the appropriate counter based on original status
+            if (originalStatus === 'pending') {
+              state.stats.pending--;
+            } else if (originalStatus === 'rejected') {
+              state.stats.rejected--;
+            }
           }
         }
       });
@@ -119,13 +147,21 @@ export const moderationSlice = createSlice({
     bulkReject: (state, action: PayloadAction<string[]>) => {
       action.payload.forEach(id => {
         const post = state.posts.find(p => p.id === id);
-        if (post && post.status !== 'rejected') {
-          post.status = 'rejected';
-          state.stats.rejected++;
-          if (post.status === 'pending') {
-            state.stats.pending--;
-          } else if (post.status === 'approved') {
-            state.stats.approved--;
+        if (post) {
+          // Store the original status before updating
+          const originalStatus = post.status;
+          
+          // Only proceed if not already rejected
+          if (originalStatus !== 'rejected') {
+            post.status = 'rejected';
+            state.stats.rejected++;
+            
+            // Decrement the appropriate counter based on original status
+            if (originalStatus === 'pending') {
+              state.stats.pending--;
+            } else if (originalStatus === 'approved') {
+              state.stats.approved--;
+            }
           }
         }
       });
