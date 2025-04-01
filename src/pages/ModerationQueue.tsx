@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   Card, CardContent, CardDescription, CardHeader, CardTitle 
@@ -26,7 +25,6 @@ import { bulkApprove, bulkReject } from '@/lib/redux/moderationSlice';
 import ModerateButtons from '@/components/moderation/ModerateButtons';
 import { startTwitterPolling, stopTwitterPolling } from '@/lib/api/xApi';
 
-// Convert date to relative time string
 const getRelativeTime = (date: Date) => {
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
@@ -43,7 +41,6 @@ const getRelativeTime = (date: Date) => {
   return date.toLocaleDateString();
 };
 
-// Platform icon component
 const PlatformIcon = ({ platform }: { platform: Post['platform'] }) => {
   switch (platform) {
     case 'twitter':
@@ -57,7 +54,6 @@ const PlatformIcon = ({ platform }: { platform: Post['platform'] }) => {
   }
 };
 
-// Severity badge component
 const SeverityBadge = ({ severity }: { severity: Post['severity'] }) => {
   const colors = {
     low: "bg-alert-low/10 text-alert-low border-alert-low/30",
@@ -72,7 +68,6 @@ const SeverityBadge = ({ severity }: { severity: Post['severity'] }) => {
   );
 };
 
-// Category badge component
 const CategoryBadge = ({ category }: { category: ContentCategory }) => {
   const Icon = categoryIcons[category];
   return (
@@ -83,7 +78,6 @@ const CategoryBadge = ({ category }: { category: ContentCategory }) => {
   );
 };
 
-// Post card component
 const PostCard = ({ post }: { post: Post }) => {
   return (
     <Card className="mb-4 relative overflow-hidden">
@@ -159,7 +153,6 @@ const PostCard = ({ post }: { post: Post }) => {
   );
 };
 
-// Main component
 const ModerationQueue = () => {
   const { toast } = useToast();
   const dispatch = useAppDispatch();
@@ -169,7 +162,6 @@ const ModerationQueue = () => {
   const [search, setSearch] = useState<string>('');
   const [selectedPosts, setSelectedPosts] = useState<string[]>([]);
   
-  // Start polling X API when component mounts
   useEffect(() => {
     startTwitterPolling();
     return () => {
@@ -177,7 +169,6 @@ const ModerationQueue = () => {
     };
   }, []);
   
-  // Filter posts based on status and search
   const filteredPosts = posts.filter(post => {
     const matchesFilter = filter === 'all' || post.status === filter;
     const matchesSearch = search === '' || 
@@ -188,12 +179,10 @@ const ModerationQueue = () => {
     return matchesFilter && matchesSearch;
   });
   
-  // Count posts by status
   const pendingCount = posts.filter(p => p.status === 'pending').length;
   const approvedCount = posts.filter(p => p.status === 'approved').length;
   const rejectedCount = posts.filter(p => p.status === 'rejected').length;
   
-  // Handle bulk actions
   const handleBulkAction = (action: 'approve' | 'reject') => {
     if (selectedPosts.length === 0) {
       toast({
@@ -218,7 +207,6 @@ const ModerationQueue = () => {
     setSelectedPosts([]);
   };
   
-  // Handle select all
   const handleSelectAll = () => {
     if (selectedPosts.length === filteredPosts.length) {
       setSelectedPosts([]);
@@ -227,7 +215,6 @@ const ModerationQueue = () => {
     }
   };
   
-  // Handle individual select
   const handleSelectPost = (id: string) => {
     if (selectedPosts.includes(id)) {
       setSelectedPosts(selectedPosts.filter(postId => postId !== id));
@@ -238,7 +225,8 @@ const ModerationQueue = () => {
   
   const handleRefresh = () => {
     startTwitterPolling();
-    toast('Refreshing content', {
+    toast({
+      title: 'Refreshing content',
       description: 'Fetching new content from social media platforms'
     });
   };
@@ -390,7 +378,6 @@ const ModerationQueue = () => {
             </TabsContent>
             
             <TabsContent value="pending" className="mt-4">
-              {/* Same structure as All tab but with pending filter */}
               {filteredPosts.map(post => (
                 <div key={post.id} className="flex items-start gap-3">
                   <div className="pt-6">
@@ -407,7 +394,6 @@ const ModerationQueue = () => {
             </TabsContent>
             
             <TabsContent value="approved" className="mt-4">
-              {/* Same structure as All tab but with approved filter */}
               {filteredPosts.map(post => (
                 <div key={post.id} className="flex items-start gap-3">
                   <div className="pt-6">
@@ -424,7 +410,6 @@ const ModerationQueue = () => {
             </TabsContent>
             
             <TabsContent value="rejected" className="mt-4">
-              {/* Same structure as All tab but with rejected filter */}
               {filteredPosts.map(post => (
                 <div key={post.id} className="flex items-start gap-3">
                   <div className="pt-6">

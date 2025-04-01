@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Check, X, MoreHorizontal, AlertTriangle } from "lucide-react";
@@ -28,8 +27,7 @@ const ModerateButtons: React.FC<ModerateButtonsProps> = ({ postId, username }) =
   const handleReject = () => {
     dispatch(rejectPost(postId));
     toast('Post rejected', {
-      description: 'This content will be used for AI training',
-      variant: 'destructive'
+      description: 'This content will be used for AI training'
     });
   };
   
@@ -44,7 +42,6 @@ const ModerateButtons: React.FC<ModerateButtonsProps> = ({ postId, username }) =
     dispatch(addToBlacklist(username));
     toast('User added to blacklist', {
       description: `All content from ${username} will be automatically rejected`,
-      variant: 'destructive'
     });
   };
   
