@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   Card, CardContent, CardDescription, CardHeader, CardTitle 
@@ -23,6 +24,7 @@ import {
 import { useAppSelector, useAppDispatch } from '@/lib/redux/hooks';
 import { bulkApprove, bulkReject } from '@/lib/redux/moderationSlice';
 import ModerateButtons from '@/components/moderation/ModerateButtons';
+import PostDetails from '@/components/moderation/PostDetails';
 import { startTwitterPolling, stopTwitterPolling } from '@/lib/api/xApi';
 
 const getRelativeTime = (date: Date) => {
@@ -78,9 +80,15 @@ const CategoryBadge = ({ category }: { category: ContentCategory }) => {
   );
 };
 
-const PostCard = ({ post }: { post: Post }) => {
+const PostCard = ({ post, onViewDetails }: { post: Post, onViewDetails: () => void }) => {
+  const formattedDate = post.timestamp.toLocaleDateString('en-US', {
+    month: '2-digit',
+    day: '2-digit',
+    year: 'numeric'
+  });
+
   return (
-    <Card className="mb-4 relative overflow-hidden">
+    <Card className="mb-4 relative overflow-hidden backdrop-blur-sm bg-card/80 border-border">
       <div className={`absolute top-0 left-0 w-1 h-full ${
         post.severity === 'high' ? 'bg-alert-high' : 
         post.severity === 'medium' ? 'bg-alert-medium' : 'bg-alert-low'
@@ -105,9 +113,9 @@ const PostCard = ({ post }: { post: Post }) => {
               <div className="ml-auto flex flex-col items-end">
                 <div className="flex items-center gap-2 mb-1">
                   <SeverityBadge severity={post.severity} />
-                  <span className="text-xs text-muted-foreground">
-                    {getRelativeTime(post.timestamp)}
-                  </span>
+                  <Badge variant="outline" className="bg-card/80 border-border/50 text-foreground/70">
+                    {formattedDate}
+                  </Badge>
                 </div>
                 <CategoryBadge category={post.category} />
               </div>
@@ -142,11 +150,20 @@ const PostCard = ({ post }: { post: Post }) => {
         <Separator className="my-4" />
         
         <div className="flex justify-between items-center">
-          <Button variant="outline" size="sm" className="mr-2 text-xs">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="mr-2 text-xs bg-accent/10 text-accent hover:bg-accent/20"
+            onClick={onViewDetails}
+          >
             View Details
           </Button>
           
-          <ModerateButtons postId={post.id} username={post.username} />
+          <ModerateButtons 
+            postId={post.id} 
+            username={post.username} 
+            onViewDetails={onViewDetails}
+          />
         </div>
       </CardContent>
     </Card>
@@ -161,6 +178,8 @@ const ModerationQueue = () => {
   const [filter, setFilter] = useState<string>('all');
   const [search, setSearch] = useState<string>('');
   const [selectedPosts, setSelectedPosts] = useState<string[]>([]);
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+  const [detailsOpen, setDetailsOpen] = useState(false);
   
   useEffect(() => {
     startTwitterPolling();
@@ -195,14 +214,17 @@ const ModerationQueue = () => {
     
     if (action === 'approve') {
       dispatch(bulkApprove(selectedPosts));
+      toast({
+        title: `${selectedPosts.length} Posts Approved`,
+        description: `The selected posts have been approved.`,
+      });
     } else {
       dispatch(bulkReject(selectedPosts));
+      toast({
+        title: `${selectedPosts.length} Posts Rejected`,
+        description: `The selected posts have been rejected.`,
+      });
     }
-    
-    toast({
-      title: `${selectedPosts.length} Posts ${action === 'approve' ? 'Approved' : 'Rejected'}`,
-      description: `The selected posts have been ${action === 'approve' ? 'approved' : 'rejected'}.`,
-    });
     
     setSelectedPosts([]);
   };
@@ -221,6 +243,11 @@ const ModerationQueue = () => {
     } else {
       setSelectedPosts([...selectedPosts, id]);
     }
+  };
+  
+  const handleViewDetails = (post: Post) => {
+    setSelectedPost(post);
+    setDetailsOpen(true);
   };
   
   const handleRefresh = () => {
@@ -246,7 +273,7 @@ const ModerationQueue = () => {
         </div>
       </div>
       
-      <Card>
+      <Card className="backdrop-blur-sm bg-card/80 border-border">
         <CardHeader>
           <CardTitle>Content Moderation</CardTitle>
           <CardDescription>
@@ -259,7 +286,7 @@ const ModerationQueue = () => {
               <Search className="absolute top-1/2 left-3 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input 
                 placeholder="Search content, username, or handle..." 
-                className="pl-10"
+                className="pl-10 bg-background/40 border-border"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
@@ -274,7 +301,7 @@ const ModerationQueue = () => {
                     <ChevronDown className="ml-2 h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
+                <DropdownMenuContent align="end" className="bg-card border-border">
                   <DropdownMenuItem onClick={() => setFilter('all')}>
                     Show All
                   </DropdownMenuItem>
@@ -302,7 +329,7 @@ const ModerationQueue = () => {
           </div>
           
           <Tabs defaultValue="all" className="mb-6">
-            <TabsList>
+            <TabsList className="bg-background/40">
               <TabsTrigger value="all">
                 All <Badge variant="secondary" className="ml-2">{posts.length}</Badge>
               </TabsTrigger>
@@ -319,7 +346,7 @@ const ModerationQueue = () => {
             
             <TabsContent value="all" className="mt-4">
               {selectedPosts.length > 0 && (
-                <div className="bg-muted/50 p-3 rounded-lg mb-4 flex items-center justify-between">
+                <div className="bg-background/30 backdrop-blur-sm p-3 rounded-lg mb-4 flex items-center justify-between border border-border/30">
                   <div className="flex items-center gap-2">
                     <Checkbox
                       checked={selectedPosts.length === filteredPosts.length}
@@ -331,7 +358,7 @@ const ModerationQueue = () => {
                     <Button 
                       variant="outline" 
                       size="sm" 
-                      className="bg-green-500/10 text-green-500 hover:bg-green-500/20 hover:text-green-500"
+                      className="bg-green-600/10 text-green-500 hover:bg-green-600/20 hover:text-green-500"
                       onClick={() => handleBulkAction('approve')}
                     >
                       <Check className="mr-1 h-3 w-3" />
@@ -359,7 +386,7 @@ const ModerationQueue = () => {
                     />
                   </div>
                   <div className="flex-1">
-                    <PostCard post={post} />
+                    <PostCard post={post} onViewDetails={() => handleViewDetails(post)} />
                   </div>
                 </div>
               ))}
@@ -387,7 +414,7 @@ const ModerationQueue = () => {
                     />
                   </div>
                   <div className="flex-1">
-                    <PostCard post={post} />
+                    <PostCard post={post} onViewDetails={() => handleViewDetails(post)} />
                   </div>
                 </div>
               ))}
@@ -403,7 +430,7 @@ const ModerationQueue = () => {
                     />
                   </div>
                   <div className="flex-1">
-                    <PostCard post={post} />
+                    <PostCard post={post} onViewDetails={() => handleViewDetails(post)} />
                   </div>
                 </div>
               ))}
@@ -419,7 +446,7 @@ const ModerationQueue = () => {
                     />
                   </div>
                   <div className="flex-1">
-                    <PostCard post={post} />
+                    <PostCard post={post} onViewDetails={() => handleViewDetails(post)} />
                   </div>
                 </div>
               ))}
@@ -427,6 +454,12 @@ const ModerationQueue = () => {
           </Tabs>
         </CardContent>
       </Card>
+
+      <PostDetails 
+        post={selectedPost} 
+        open={detailsOpen} 
+        onOpenChange={setDetailsOpen} 
+      />
     </div>
   );
 };

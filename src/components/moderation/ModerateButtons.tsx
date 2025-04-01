@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Check, X, MoreHorizontal, AlertTriangle } from "lucide-react";
@@ -12,22 +13,23 @@ import { toast } from "sonner";
 interface ModerateButtonsProps {
   postId: string;
   username: string;
+  onViewDetails?: () => void;
 }
 
-const ModerateButtons: React.FC<ModerateButtonsProps> = ({ postId, username }) => {
+const ModerateButtons: React.FC<ModerateButtonsProps> = ({ postId, username, onViewDetails }) => {
   const dispatch = useAppDispatch();
   
   const handleApprove = () => {
     dispatch(approvePost(postId));
     toast('Post approved', {
-      description: 'This content will be used for AI training'
+      description: 'This content has been approved for AI training'
     });
   };
   
   const handleReject = () => {
     dispatch(rejectPost(postId));
     toast('Post rejected', {
-      description: 'This content will be used for AI training'
+      description: 'This content has been rejected and removed from the feed'
     });
   };
   
@@ -56,7 +58,7 @@ const ModerateButtons: React.FC<ModerateButtonsProps> = ({ postId, username }) =
       <Button 
         variant="outline" 
         size="sm" 
-        className="bg-green-500/10 text-green-500 hover:bg-green-500/20 hover:text-green-500"
+        className="bg-green-600/20 text-green-500 hover:bg-green-600/30 hover:text-green-500"
         onClick={handleApprove}
       >
         <Check className="mr-1 h-3 w-3" />
@@ -65,11 +67,19 @@ const ModerateButtons: React.FC<ModerateButtonsProps> = ({ postId, username }) =
       <Button 
         variant="outline" 
         size="sm"
-        className="bg-alert-high/10 text-alert-high hover:bg-alert-high/20 hover:text-alert-high"
+        className="bg-alert-high/20 text-alert-high hover:bg-alert-high/30 hover:text-alert-high"
         onClick={handleReject}
       >
         <X className="mr-1 h-3 w-3" />
         Reject
+      </Button>
+      <Button
+        variant="outline"
+        size="sm"
+        className="bg-accent/10 text-accent hover:bg-accent/20"
+        onClick={onViewDetails}
+      >
+        View Details
       </Button>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -77,7 +87,7 @@ const ModerateButtons: React.FC<ModerateButtonsProps> = ({ postId, username }) =
             <MoreHorizontal className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
+        <DropdownMenuContent align="end" className="bg-card border-border">
           <DropdownMenuItem onClick={handleRetrainAI}>
             <AlertTriangle className="mr-2 h-4 w-4" />
             <span>Retrain AI with this post</span>

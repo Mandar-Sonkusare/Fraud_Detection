@@ -45,7 +45,7 @@ export const moderationSlice = createSlice({
     approvePost: (state, action: PayloadAction<string>) => {
       const post = state.posts.find(p => p.id === action.payload);
       if (post) {
-        // Store the original status before updating
+        // Store the original status
         const originalStatus = post.status;
         
         // Only proceed if not already approved
@@ -69,7 +69,7 @@ export const moderationSlice = createSlice({
     rejectPost: (state, action: PayloadAction<string>) => {
       const post = state.posts.find(p => p.id === action.payload);
       if (post) {
-        // Store the original status before updating
+        // Store the original status
         const originalStatus = post.status;
         
         // Only proceed if not already rejected
@@ -93,12 +93,18 @@ export const moderationSlice = createSlice({
     addToWhitelist: (state, action: PayloadAction<string>) => {
       if (!state.whitelist.includes(action.payload)) {
         state.whitelist.push(action.payload);
+        
         // Auto-approve all pending posts from this user
         state.posts.forEach(post => {
           if (post.username === action.payload && post.status === 'pending') {
+            // Store original status (though we know it's pending here)
+            const originalStatus = post.status;
+            
             post.status = 'approved';
             state.stats.approved++;
             state.stats.pending--;
+            
+            // Update rates
             state.stats.approvalRate = state.stats.approved / state.stats.totalFlagged;
             state.stats.rejectionRate = state.stats.rejected / state.stats.totalFlagged;
           }
@@ -108,12 +114,18 @@ export const moderationSlice = createSlice({
     addToBlacklist: (state, action: PayloadAction<string>) => {
       if (!state.blacklist.includes(action.payload)) {
         state.blacklist.push(action.payload);
+        
         // Auto-reject all pending posts from this user
         state.posts.forEach(post => {
           if (post.username === action.payload && post.status === 'pending') {
+            // Store original status (though we know it's pending here)
+            const originalStatus = post.status;
+            
             post.status = 'rejected';
             state.stats.rejected++;
             state.stats.pending--;
+            
+            // Update rates
             state.stats.approvalRate = state.stats.approved / state.stats.totalFlagged;
             state.stats.rejectionRate = state.stats.rejected / state.stats.totalFlagged;
           }
@@ -124,7 +136,7 @@ export const moderationSlice = createSlice({
       action.payload.forEach(id => {
         const post = state.posts.find(p => p.id === id);
         if (post) {
-          // Store the original status before updating
+          // Store the original status
           const originalStatus = post.status;
           
           // Only proceed if not already approved
@@ -141,6 +153,8 @@ export const moderationSlice = createSlice({
           }
         }
       });
+      
+      // Update rates
       state.stats.approvalRate = state.stats.approved / state.stats.totalFlagged;
       state.stats.rejectionRate = state.stats.rejected / state.stats.totalFlagged;
     },
@@ -148,7 +162,7 @@ export const moderationSlice = createSlice({
       action.payload.forEach(id => {
         const post = state.posts.find(p => p.id === id);
         if (post) {
-          // Store the original status before updating
+          // Store the original status
           const originalStatus = post.status;
           
           // Only proceed if not already rejected
@@ -165,14 +179,34 @@ export const moderationSlice = createSlice({
           }
         }
       });
+      
+      // Update rates
       state.stats.approvalRate = state.stats.approved / state.stats.totalFlagged;
       state.stats.rejectionRate = state.stats.rejected / state.stats.totalFlagged;
     },
     addNewFlaggedPost: (state, action: PayloadAction<Post>) => {
       // Check if post already exists
       if (!state.posts.some(p => p.id === action.payload.id)) {
-        state.posts.unshift(action.payload);
-        state.stats.pending++;
+        // Check if user is in whitelist or blacklist
+        const username = action.payload.username;
+        let status = 'pending';
+        
+        if (state.whitelist.includes(username)) {
+          status = 'approved';
+          state.stats.approved++;
+        } else if (state.blacklist.includes(username)) {
+          status = 'rejected';
+          state.stats.rejected++;
+        } else {
+          state.stats.pending++;
+        }
+        
+        // Add the post with appropriate status
+        state.posts.unshift({
+          ...action.payload,
+          status
+        });
+        
         state.stats.totalFlagged++;
         state.stats.approvalRate = state.stats.approved / state.stats.totalFlagged;
         state.stats.rejectionRate = state.stats.rejected / state.stats.totalFlagged;

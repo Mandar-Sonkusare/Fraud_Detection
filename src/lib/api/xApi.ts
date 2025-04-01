@@ -75,6 +75,14 @@ const mockTweets = [
   }
 ];
 
+// Format the timestamp for display
+const formatTime = () => {
+  const now = new Date();
+  const hours = now.getHours().toString().padStart(2, '0');
+  const minutes = now.getMinutes().toString().padStart(2, '0');
+  return `${hours}:${minutes}`;
+};
+
 // Simulated X API fetch
 export const fetchTweets = async (): Promise<void> => {
   try {
@@ -114,9 +122,14 @@ export const fetchTweets = async (): Promise<void> => {
           // Add to Redux store
           store.dispatch(addNewFlaggedPost(post));
           
-          // Show notification
+          // Show notification with timestamp
+          const currentTime = formatTime();
+          
           toast('New content flagged', {
             description: `${tweet.user.name} (@${tweet.user.screen_name}) post has been flagged as ${analysis.category}`,
+            duration: 5000,
+            className: "bg-card border border-border backdrop-blur-lg text-foreground",
+            descriptionClassName: "text-foreground/80",
           });
         }
       });
