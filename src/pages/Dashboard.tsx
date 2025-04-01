@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowDown, ArrowUp, BarChart3, Clock, Shield } from 'lucide-react';
 import { 
   AreaChart, Area, BarChart as RechartBarChart, Bar, XAxis, YAxis, 
-  CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell 
+  CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, TooltipProps 
 } from 'recharts';
 
 const Dashboard = () => {
@@ -44,6 +44,14 @@ const Dashboard = () => {
   const SEVERITY_COLORS = ['#33C3F0', '#F97316', '#ea384c'];
   const CATEGORY_COLORS = ['#8b5cf6', '#7e69ab', '#6e59a5', '#3d328c', '#1A1F2C', '#9b87f5', '#b1a0ff', '#cbc2ff'];
   const PLATFORM_COLORS = ['#1DA1F2', '#4267B2', '#E1306C'];
+
+  // Custom formatter for percentages to fix the TypeScript error
+  const percentFormatter = (value: number | string) => {
+    if (typeof value === 'number') {
+      return `${value.toFixed(1)}%`;
+    }
+    return `${value}%`;
+  };
 
   return (
     <div className="space-y-6">
@@ -240,7 +248,9 @@ const Dashboard = () => {
                     <XAxis dataKey="name" stroke="#888888" />
                     <YAxis stroke="#888888" />
                     <Tooltip 
-                      formatter={(value) => [`${value.toFixed(1)}%`, 'Rate']}
+                      formatter={(value) => {
+                        return typeof value === 'number' ? [`${value.toFixed(1)}%`, 'Rate'] : [`${value}%`, 'Rate'];
+                      }}
                       contentStyle={{ 
                         backgroundColor: 'rgba(15, 23, 42, 0.9)', 
                         border: '1px solid #3f4865',
