@@ -73,14 +73,6 @@ const ModerateButtons: React.FC<ModerateButtonsProps> = ({ postId, username, onV
         <X className="mr-1 h-3 w-3" />
         Reject
       </Button>
-      <Button
-        variant="outline"
-        size="sm"
-        className="bg-accent/10 text-accent hover:bg-accent/20"
-        onClick={onViewDetails}
-      >
-        View Details
-      </Button>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="icon" className="h-8 w-8">

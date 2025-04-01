@@ -170,6 +170,18 @@ const PostCard = ({ post, onViewDetails }: { post: Post, onViewDetails: () => vo
   );
 };
 
+const EmptyState = ({ message }: { message: string }) => (
+  <div className="p-8 text-center">
+    <div className="mx-auto w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-4">
+      <Search className="h-6 w-6 text-muted-foreground" />
+    </div>
+    <h3 className="text-lg font-medium">No posts found</h3>
+    <p className="text-muted-foreground mt-1">
+      {message}
+    </p>
+  </div>
+);
+
 const ModerationQueue = () => {
   const { toast } = useToast();
   const dispatch = useAppDispatch();
@@ -180,6 +192,7 @@ const ModerationQueue = () => {
   const [selectedPosts, setSelectedPosts] = useState<string[]>([]);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('all');
   
   useEffect(() => {
     startTwitterPolling();
@@ -198,6 +211,7 @@ const ModerationQueue = () => {
     return matchesFilter && matchesSearch;
   });
   
+  const allCount = posts.length;
   const pendingCount = posts.filter(p => p.status === 'pending').length;
   const approvedCount = posts.filter(p => p.status === 'approved').length;
   const rejectedCount = posts.filter(p => p.status === 'rejected').length;
@@ -258,6 +272,23 @@ const ModerationQueue = () => {
     });
   };
 
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    setFilter(value);
+  };
+
+  // Get the right posts for the current tab
+  const getPostsForCurrentTab = () => {
+    if (activeTab === 'all') return filteredPosts;
+    return posts.filter(post => post.status === activeTab && 
+      (search === '' || 
+        post.content.toLowerCase().includes(search.toLowerCase()) ||
+        post.username.toLowerCase().includes(search.toLowerCase()) ||
+        post.handle.toLowerCase().includes(search.toLowerCase())));
+  };
+
+  const currentTabPosts = getPostsForCurrentTab();
+  
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -328,18 +359,18 @@ const ModerationQueue = () => {
             </div>
           </div>
           
-          <Tabs defaultValue="all" className="mb-6">
+          <Tabs defaultValue="all" className="mb-6" value={activeTab} onValueChange={handleTabChange}>
             <TabsList className="bg-background/40">
-              <TabsTrigger value="all">
-                All <Badge variant="secondary" className="ml-2">{posts.length}</Badge>
+              <TabsTrigger value="all" className="relative">
+                All <Badge variant="secondary" className="ml-2">{allCount}</Badge>
               </TabsTrigger>
-              <TabsTrigger value="pending">
+              <TabsTrigger value="pending" className="relative">
                 Pending <Badge variant="secondary" className="ml-2">{pendingCount}</Badge>
               </TabsTrigger>
-              <TabsTrigger value="approved">
+              <TabsTrigger value="approved" className="relative">
                 Approved <Badge variant="secondary" className="ml-2">{approvedCount}</Badge>
               </TabsTrigger>
-              <TabsTrigger value="rejected">
+              <TabsTrigger value="rejected" className="relative">
                 Rejected <Badge variant="secondary" className="ml-2">{rejectedCount}</Badge>
               </TabsTrigger>
             </TabsList>
@@ -377,79 +408,83 @@ const ModerationQueue = () => {
                 </div>
               )}
               
-              {filteredPosts.map(post => (
-                <div key={post.id} className="flex items-start gap-3">
-                  <div className="pt-6">
-                    <Checkbox
-                      checked={selectedPosts.includes(post.id)}
-                      onCheckedChange={() => handleSelectPost(post.id)}
-                    />
+              {currentTabPosts.length > 0 ? (
+                currentTabPosts.map(post => (
+                  <div key={post.id} className="flex items-start gap-3">
+                    <div className="pt-6">
+                      <Checkbox
+                        checked={selectedPosts.includes(post.id)}
+                        onCheckedChange={() => handleSelectPost(post.id)}
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <PostCard post={post} onViewDetails={() => handleViewDetails(post)} />
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <PostCard post={post} onViewDetails={() => handleViewDetails(post)} />
-                  </div>
-                </div>
-              ))}
-              
-              {filteredPosts.length === 0 && (
-                <div className="p-8 text-center">
-                  <div className="mx-auto w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-4">
-                    <Search className="h-6 w-6 text-muted-foreground" />
-                  </div>
-                  <h3 className="text-lg font-medium">No posts found</h3>
-                  <p className="text-muted-foreground mt-1">
-                    Try adjusting your search or filter criteria
-                  </p>
-                </div>
+                ))
+              ) : (
+                <EmptyState message="No posts found in this category" />
               )}
             </TabsContent>
             
             <TabsContent value="pending" className="mt-4">
-              {filteredPosts.map(post => (
-                <div key={post.id} className="flex items-start gap-3">
-                  <div className="pt-6">
-                    <Checkbox
-                      checked={selectedPosts.includes(post.id)}
-                      onCheckedChange={() => handleSelectPost(post.id)}
-                    />
+              {currentTabPosts.length > 0 ? (
+                currentTabPosts.map(post => (
+                  <div key={post.id} className="flex items-start gap-3">
+                    <div className="pt-6">
+                      <Checkbox
+                        checked={selectedPosts.includes(post.id)}
+                        onCheckedChange={() => handleSelectPost(post.id)}
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <PostCard post={post} onViewDetails={() => handleViewDetails(post)} />
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <PostCard post={post} onViewDetails={() => handleViewDetails(post)} />
-                  </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                <EmptyState message="No pending posts found" />
+              )}
             </TabsContent>
             
             <TabsContent value="approved" className="mt-4">
-              {filteredPosts.map(post => (
-                <div key={post.id} className="flex items-start gap-3">
-                  <div className="pt-6">
-                    <Checkbox
-                      checked={selectedPosts.includes(post.id)}
-                      onCheckedChange={() => handleSelectPost(post.id)}
-                    />
+              {currentTabPosts.length > 0 ? (
+                currentTabPosts.map(post => (
+                  <div key={post.id} className="flex items-start gap-3">
+                    <div className="pt-6">
+                      <Checkbox
+                        checked={selectedPosts.includes(post.id)}
+                        onCheckedChange={() => handleSelectPost(post.id)}
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <PostCard post={post} onViewDetails={() => handleViewDetails(post)} />
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <PostCard post={post} onViewDetails={() => handleViewDetails(post)} />
-                  </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                <EmptyState message="No approved posts found" />
+              )}
             </TabsContent>
             
             <TabsContent value="rejected" className="mt-4">
-              {filteredPosts.map(post => (
-                <div key={post.id} className="flex items-start gap-3">
-                  <div className="pt-6">
-                    <Checkbox
-                      checked={selectedPosts.includes(post.id)}
-                      onCheckedChange={() => handleSelectPost(post.id)}
-                    />
+              {currentTabPosts.length > 0 ? (
+                currentTabPosts.map(post => (
+                  <div key={post.id} className="flex items-start gap-3">
+                    <div className="pt-6">
+                      <Checkbox
+                        checked={selectedPosts.includes(post.id)}
+                        onCheckedChange={() => handleSelectPost(post.id)}
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <PostCard post={post} onViewDetails={() => handleViewDetails(post)} />
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <PostCard post={post} onViewDetails={() => handleViewDetails(post)} />
-                  </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                <EmptyState message="No rejected posts found" />
+              )}
             </TabsContent>
           </Tabs>
         </CardContent>
