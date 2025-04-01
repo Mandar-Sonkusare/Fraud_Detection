@@ -11,6 +11,7 @@ import MainLayout from "./components/layout/MainLayout";
 import Overview from "./pages/Overview";
 import Dashboard from "./pages/Dashboard";
 import ModerationQueue from "./pages/ModerationQueue";
+import FlaggedUsers from "./pages/FlaggedUsers";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
@@ -27,6 +28,7 @@ const App = () => (
             <Route path="/" element={<MainLayout><Overview /></MainLayout>} />
             <Route path="/dashboard" element={<MainLayout><Dashboard /></MainLayout>} />
             <Route path="/moderation" element={<MainLayout><ModerationQueue /></MainLayout>} />
+            <Route path="/flagged-users" element={<MainLayout><FlaggedUsers /></MainLayout>} />
             <Route path="/settings" element={<MainLayout><Settings /></MainLayout>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
