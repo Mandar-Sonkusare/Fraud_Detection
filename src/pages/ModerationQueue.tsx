@@ -1,0 +1,482 @@
+
+import React, { useState } from 'react';
+import { 
+  Card, CardContent, CardDescription, CardHeader, CardTitle 
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { 
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, 
+  DropdownMenuTrigger, DropdownMenuSeparator 
+} from "@/components/ui/dropdown-menu";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Separator } from "@/components/ui/separator";
+import { 
+  AlertSeverity, ContentCategory, Post, categoryIcons, categoryNames, 
+  generateMockPosts 
+} from "@/lib/mock-data";
+import { useToast } from "@/hooks/use-toast";
+import { 
+  ChevronDown, Filter, Search, Check, X, AlertTriangle, 
+  MoreHorizontal, Twitter, Facebook, Instagram, ArrowUpDown
+} from "lucide-react";
+
+// Convert date to relative time string
+const getRelativeTime = (date: Date) => {
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffSec = Math.floor(diffMs / 1000);
+  const diffMin = Math.floor(diffSec / 60);
+  const diffHour = Math.floor(diffMin / 60);
+  const diffDay = Math.floor(diffHour / 24);
+
+  if (diffSec < 60) return `${diffSec}s ago`;
+  if (diffMin < 60) return `${diffMin}m ago`;
+  if (diffHour < 24) return `${diffHour}h ago`;
+  if (diffDay < 7) return `${diffDay}d ago`;
+
+  return date.toLocaleDateString();
+};
+
+// Platform icon component
+const PlatformIcon = ({ platform }: { platform: Post['platform'] }) => {
+  switch (platform) {
+    case 'twitter':
+      return <Twitter className="h-4 w-4 text-[#1DA1F2]" />;
+    case 'facebook':
+      return <Facebook className="h-4 w-4 text-[#4267B2]" />;
+    case 'instagram':
+      return <Instagram className="h-4 w-4 text-[#E1306C]" />;
+    default:
+      return null;
+  }
+};
+
+// Severity badge component
+const SeverityBadge = ({ severity }: { severity: AlertSeverity }) => {
+  const colors = {
+    low: "bg-alert-low/10 text-alert-low border-alert-low/30",
+    medium: "bg-alert-medium/10 text-alert-medium border-alert-medium/30",
+    high: "bg-alert-high/10 text-alert-high border-alert-high/30"
+  };
+  
+  return (
+    <Badge variant="outline" className={colors[severity]}>
+      {severity.charAt(0).toUpperCase() + severity.slice(1)}
+    </Badge>
+  );
+};
+
+// Category badge component
+const CategoryBadge = ({ category }: { category: ContentCategory }) => {
+  const Icon = categoryIcons[category];
+  return (
+    <Badge variant="outline" className="bg-sentinel-500/10 text-sentinel-500 border-sentinel-500/30">
+      <Icon className="h-3 w-3 mr-1" />
+      {categoryNames[category]}
+    </Badge>
+  );
+};
+
+// Post card component
+const PostCard = ({ post, onAction }: { post: Post, onAction: (id: string, action: 'approve' | 'reject') => void }) => {
+  return (
+    <Card className="mb-4 relative overflow-hidden">
+      <div className={`absolute top-0 left-0 w-1 h-full ${
+        post.severity === 'high' ? 'bg-alert-high' : 
+        post.severity === 'medium' ? 'bg-alert-medium' : 'bg-alert-low'
+      }`} />
+      
+      <CardContent className="pt-6">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1">
+            <div className="flex items-center mb-2">
+              <div className="flex items-center gap-2">
+                <div className="h-8 w-8 rounded-full bg-accent/20 flex items-center justify-center text-accent font-medium">
+                  {post.username.split(' ').map(n => n[0]).join('')}
+                </div>
+                <div>
+                  <p className="font-medium">{post.username}</p>
+                  <div className="flex items-center text-muted-foreground text-xs">
+                    <PlatformIcon platform={post.platform} />
+                    <span className="ml-1">@{post.handle}</span>
+                  </div>
+                </div>
+              </div>
+              <div className="ml-auto flex flex-col items-end">
+                <div className="flex items-center gap-2 mb-1">
+                  <SeverityBadge severity={post.severity} />
+                  <span className="text-xs text-muted-foreground">
+                    {getRelativeTime(post.timestamp)}
+                  </span>
+                </div>
+                <CategoryBadge category={post.category} />
+              </div>
+            </div>
+            
+            <p className="text-sm mt-3 mb-4">{post.content}</p>
+            
+            <div className="flex items-center text-xs text-muted-foreground space-x-4">
+              <div className="flex items-center">
+                <span>AI Confidence: </span>
+                <Badge variant="outline" className="ml-1 bg-sentinel-500/10 text-sentinel-500 border-sentinel-500/30">
+                  {Math.round(post.confidence * 100)}%
+                </Badge>
+              </div>
+              {post.metadata && (
+                <>
+                  {post.metadata.likes !== undefined && (
+                    <div>Likes: {post.metadata.likes}</div>
+                  )}
+                  {post.metadata.shares !== undefined && (
+                    <div>Shares: {post.metadata.shares}</div>
+                  )}
+                  {post.metadata.replies !== undefined && (
+                    <div>Replies: {post.metadata.replies}</div>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+        
+        <Separator className="my-4" />
+        
+        <div className="flex justify-between items-center">
+          <Button variant="outline" size="sm" className="mr-2 text-xs">
+            View Details
+          </Button>
+          
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="bg-green-500/10 text-green-500 hover:bg-green-500/20 hover:text-green-500"
+              onClick={() => onAction(post.id, 'approve')}
+            >
+              <Check className="mr-1 h-3 w-3" />
+              Approve
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm"
+              className="bg-alert-high/10 text-alert-high hover:bg-alert-high/20 hover:text-alert-high"
+              onClick={() => onAction(post.id, 'reject')}
+            >
+              <X className="mr-1 h-3 w-3" />
+              Reject
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem>
+                  <AlertTriangle className="mr-2 h-4 w-4" />
+                  <span>Retrain AI with this post</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>Add to whitelist</DropdownMenuItem>
+                <DropdownMenuItem>Add to blacklist</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+// Main component
+const ModerationQueue = () => {
+  const { toast } = useToast();
+  const [filter, setFilter] = useState<string>('all');
+  const [search, setSearch] = useState<string>('');
+  const [allPosts, setAllPosts] = useState<Post[]>(generateMockPosts(30));
+  const [selectedPosts, setSelectedPosts] = useState<string[]>([]);
+  
+  // Filter posts based on status and search
+  const filteredPosts = allPosts.filter(post => {
+    const matchesFilter = filter === 'all' || post.status === filter;
+    const matchesSearch = search === '' || 
+      post.content.toLowerCase().includes(search.toLowerCase()) ||
+      post.username.toLowerCase().includes(search.toLowerCase()) ||
+      post.handle.toLowerCase().includes(search.toLowerCase());
+    
+    return matchesFilter && matchesSearch;
+  });
+  
+  // Count posts by status
+  const pendingCount = allPosts.filter(p => p.status === 'pending').length;
+  const approvedCount = allPosts.filter(p => p.status === 'approved').length;
+  const rejectedCount = allPosts.filter(p => p.status === 'rejected').length;
+  
+  // Action handler for approving/rejecting posts
+  const handleAction = (id: string, action: 'approve' | 'reject') => {
+    setAllPosts(posts => 
+      posts.map(post => 
+        post.id === id 
+          ? { ...post, status: action === 'approve' ? 'approved' : 'rejected' } 
+          : post
+      )
+    );
+    
+    toast({
+      title: action === 'approve' ? "Post Approved" : "Post Rejected",
+      description: `The post has been ${action === 'approve' ? 'approved' : 'rejected'} and will be used for AI training.`,
+    });
+  };
+  
+  // Handle bulk actions
+  const handleBulkAction = (action: 'approve' | 'reject') => {
+    if (selectedPosts.length === 0) {
+      toast({
+        title: "No posts selected",
+        description: "Please select posts to perform this action.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setAllPosts(posts => 
+      posts.map(post => 
+        selectedPosts.includes(post.id) 
+          ? { ...post, status: action === 'approve' ? 'approved' : 'rejected' } 
+          : post
+      )
+    );
+    
+    toast({
+      title: `${selectedPosts.length} Posts ${action === 'approve' ? 'Approved' : 'Rejected'}`,
+      description: `The selected posts have been ${action === 'approve' ? 'approved' : 'rejected'}.`,
+    });
+    
+    setSelectedPosts([]);
+  };
+  
+  // Handle select all
+  const handleSelectAll = () => {
+    if (selectedPosts.length === filteredPosts.length) {
+      setSelectedPosts([]);
+    } else {
+      setSelectedPosts(filteredPosts.map(post => post.id));
+    }
+  };
+  
+  // Handle individual select
+  const handleSelectPost = (id: string) => {
+    if (selectedPosts.includes(id)) {
+      setSelectedPosts(selectedPosts.filter(postId => postId !== id));
+    } else {
+      setSelectedPosts([...selectedPosts, id]);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold tracking-tight">Moderation Queue</h1>
+        
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm">
+            Export
+          </Button>
+          <Button variant="default" size="sm">
+            Refresh
+          </Button>
+        </div>
+      </div>
+      
+      <Card>
+        <CardHeader>
+          <CardTitle>Content Moderation</CardTitle>
+          <CardDescription>
+            Review and moderate content flagged by the AI system
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="mb-6 flex items-center justify-between">
+            <div className="relative w-full max-w-md">
+              <Search className="absolute top-1/2 left-3 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input 
+                placeholder="Search content, username, or handle..." 
+                className="pl-10"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="flex items-center">
+                    <Filter className="mr-2 h-4 w-4" />
+                    Filter
+                    <ChevronDown className="ml-2 h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => setFilter('all')}>
+                    Show All
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilter('pending')}>
+                    Pending Only
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilter('approved')}>
+                    Approved Only
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilter('rejected')}>
+                    Rejected Only
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem>
+                    <ArrowUpDown className="mr-2 h-4 w-4" />
+                    Sort by Date
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <ArrowUpDown className="mr-2 h-4 w-4" />
+                    Sort by Severity
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+          
+          <Tabs defaultValue="all" className="mb-6">
+            <TabsList>
+              <TabsTrigger value="all">
+                All <Badge variant="secondary" className="ml-2">{allPosts.length}</Badge>
+              </TabsTrigger>
+              <TabsTrigger value="pending">
+                Pending <Badge variant="secondary" className="ml-2">{pendingCount}</Badge>
+              </TabsTrigger>
+              <TabsTrigger value="approved">
+                Approved <Badge variant="secondary" className="ml-2">{approvedCount}</Badge>
+              </TabsTrigger>
+              <TabsTrigger value="rejected">
+                Rejected <Badge variant="secondary" className="ml-2">{rejectedCount}</Badge>
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="all" className="mt-4">
+              {selectedPosts.length > 0 && (
+                <div className="bg-muted/50 p-3 rounded-lg mb-4 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Checkbox
+                      checked={selectedPosts.length === filteredPosts.length}
+                      onCheckedChange={handleSelectAll}
+                    />
+                    <span>{selectedPosts.length} posts selected</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="bg-green-500/10 text-green-500 hover:bg-green-500/20 hover:text-green-500"
+                      onClick={() => handleBulkAction('approve')}
+                    >
+                      <Check className="mr-1 h-3 w-3" />
+                      Approve All
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      className="bg-alert-high/10 text-alert-high hover:bg-alert-high/20 hover:text-alert-high"
+                      onClick={() => handleBulkAction('reject')}
+                    >
+                      <X className="mr-1 h-3 w-3" />
+                      Reject All
+                    </Button>
+                  </div>
+                </div>
+              )}
+              
+              {filteredPosts.map(post => (
+                <div key={post.id} className="flex items-start gap-3">
+                  <div className="pt-6">
+                    <Checkbox
+                      checked={selectedPosts.includes(post.id)}
+                      onCheckedChange={() => handleSelectPost(post.id)}
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <PostCard post={post} onAction={handleAction} />
+                  </div>
+                </div>
+              ))}
+              
+              {filteredPosts.length === 0 && (
+                <div className="p-8 text-center">
+                  <div className="mx-auto w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-4">
+                    <Search className="h-6 w-6 text-muted-foreground" />
+                  </div>
+                  <h3 className="text-lg font-medium">No posts found</h3>
+                  <p className="text-muted-foreground mt-1">
+                    Try adjusting your search or filter criteria
+                  </p>
+                </div>
+              )}
+            </TabsContent>
+            
+            <TabsContent value="pending" className="mt-4">
+              {/* Same structure as All tab but with pending filter */}
+              {filteredPosts.map(post => (
+                <div key={post.id} className="flex items-start gap-3">
+                  <div className="pt-6">
+                    <Checkbox
+                      checked={selectedPosts.includes(post.id)}
+                      onCheckedChange={() => handleSelectPost(post.id)}
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <PostCard post={post} onAction={handleAction} />
+                  </div>
+                </div>
+              ))}
+            </TabsContent>
+            
+            <TabsContent value="approved" className="mt-4">
+              {/* Same structure as All tab but with approved filter */}
+              {filteredPosts.map(post => (
+                <div key={post.id} className="flex items-start gap-3">
+                  <div className="pt-6">
+                    <Checkbox
+                      checked={selectedPosts.includes(post.id)}
+                      onCheckedChange={() => handleSelectPost(post.id)}
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <PostCard post={post} onAction={handleAction} />
+                  </div>
+                </div>
+              ))}
+            </TabsContent>
+            
+            <TabsContent value="rejected" className="mt-4">
+              {/* Same structure as All tab but with rejected filter */}
+              {filteredPosts.map(post => (
+                <div key={post.id} className="flex items-start gap-3">
+                  <div className="pt-6">
+                    <Checkbox
+                      checked={selectedPosts.includes(post.id)}
+                      onCheckedChange={() => handleSelectPost(post.id)}
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <PostCard post={post} onAction={handleAction} />
+                  </div>
+                </div>
+              ))}
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+export default ModerationQueue;

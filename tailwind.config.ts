@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,6 +62,24 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				// Social Sentinel AI custom colors
+				sentinel: {
+					"50": "#f2f1fd",
+					"100": "#e5deff",
+					"200": "#cbc2ff",
+					"300": "#b1a0ff",
+					"400": "#9b87f5",
+					"500": "#8b5cf6",
+					"600": "#7e69ab",
+					"700": "#6e59a5",
+					"800": "#3d328c",
+					"900": "#1A1F2C"
+				},
+				alert: {
+					low: "#33C3F0",
+					medium: "#F97316",
+					high: "#ea384c"
 				}
 			},
 			borderRadius: {
@@ -84,11 +103,16 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'pulse-slow': {
+					'0%, 100%': { opacity: '1' },
+					'50%': { opacity: '0.8' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'pulse-slow': 'pulse-slow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
 			}
 		}
 	},
