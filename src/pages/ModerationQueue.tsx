@@ -27,22 +27,6 @@ import ModerateButtons from '@/components/moderation/ModerateButtons';
 import PostDetails from '@/components/moderation/PostDetails';
 import { startTwitterPolling, stopTwitterPolling } from '@/lib/api/xApi';
 
-const getRelativeTime = (date: Date) => {
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffSec = Math.floor(diffMs / 1000);
-  const diffMin = Math.floor(diffSec / 60);
-  const diffHour = Math.floor(diffMin / 60);
-  const diffDay = Math.floor(diffHour / 24);
-
-  if (diffSec < 60) return `${diffSec}s ago`;
-  if (diffMin < 60) return `${diffMin}m ago`;
-  if (diffHour < 24) return `${diffHour}h ago`;
-  if (diffDay < 7) return `${diffDay}d ago`;
-
-  return date.toLocaleDateString();
-};
-
 const PlatformIcon = ({ platform }: { platform: Post['platform'] }) => {
   switch (platform) {
     case 'twitter':
@@ -162,7 +146,6 @@ const PostCard = ({ post, onViewDetails }: { post: Post, onViewDetails: () => vo
           <ModerateButtons 
             postId={post.id} 
             username={post.username} 
-            onViewDetails={onViewDetails}
           />
         </div>
       </CardContent>
@@ -195,7 +178,10 @@ const ModerationQueue = () => {
   const [activeTab, setActiveTab] = useState('all');
   
   useEffect(() => {
+    // Start polling for Twitter data
     startTwitterPolling();
+    
+    // Clean up on component unmount
     return () => {
       stopTwitterPolling();
     };
@@ -380,7 +366,7 @@ const ModerationQueue = () => {
                 <div className="bg-background/30 backdrop-blur-sm p-3 rounded-lg mb-4 flex items-center justify-between border border-border/30">
                   <div className="flex items-center gap-2">
                     <Checkbox
-                      checked={selectedPosts.length === filteredPosts.length}
+                      checked={selectedPosts.length === filteredPosts.length && filteredPosts.length > 0}
                       onCheckedChange={handleSelectAll}
                     />
                     <span>{selectedPosts.length} posts selected</span>

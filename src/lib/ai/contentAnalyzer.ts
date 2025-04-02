@@ -45,6 +45,15 @@ interface AnalysisResult {
 }
 
 export const analyzeContent = (content: string): AnalysisResult => {
+  if (!content) {
+    return {
+      isFlagged: false,
+      confidence: 0,
+      category: null,
+      severity: 'low'
+    };
+  }
+  
   const contentLower = content.toLowerCase();
   let flagged = false;
   let category: ContentCategory | null = null;
