@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -28,7 +27,6 @@ const ApiKeyConfig = () => {
     } else {
       toast('API Key Required', {
         description: 'Please enter a valid API key',
-        variant: 'destructive',
       });
     }
   };
@@ -38,7 +36,7 @@ const ApiKeyConfig = () => {
       <CardHeader>
         <CardTitle>X API Configuration</CardTitle>
         <CardDescription>
-          Enter your X (Twitter) API key to fetch real-time data
+          Enter your X API key to fetch real-time data
         </CardDescription>
       </CardHeader>
       <CardContent>
