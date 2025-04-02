@@ -35,8 +35,8 @@ initialState.stats.approved = initialState.posts.filter(p => p.status === 'appro
 initialState.stats.rejected = initialState.posts.filter(p => p.status === 'rejected').length;
 initialState.stats.pending = initialState.posts.filter(p => p.status === 'pending').length;
 initialState.stats.totalFlagged = initialState.posts.length;
-initialState.stats.approvalRate = initialState.stats.approved / initialState.stats.totalFlagged || 0;
-initialState.stats.rejectionRate = initialState.stats.rejected / initialState.stats.totalFlagged || 0;
+initialState.stats.approvalRate = initialState.stats.approved / initialState.stats.totalFlagged;
+initialState.stats.rejectionRate = initialState.stats.rejected / initialState.stats.totalFlagged;
 
 export const moderationSlice = createSlice({
   name: 'moderation',
@@ -61,8 +61,8 @@ export const moderationSlice = createSlice({
           }
           
           // Update rates
-          state.stats.approvalRate = state.stats.approved / state.stats.totalFlagged || 0;
-          state.stats.rejectionRate = state.stats.rejected / state.stats.totalFlagged || 0;
+          state.stats.approvalRate = state.stats.approved / state.stats.totalFlagged;
+          state.stats.rejectionRate = state.stats.rejected / state.stats.totalFlagged;
         }
       }
     },
@@ -85,8 +85,8 @@ export const moderationSlice = createSlice({
           }
           
           // Update rates
-          state.stats.approvalRate = state.stats.approved / state.stats.totalFlagged || 0;
-          state.stats.rejectionRate = state.stats.rejected / state.stats.totalFlagged || 0;
+          state.stats.approvalRate = state.stats.approved / state.stats.totalFlagged;
+          state.stats.rejectionRate = state.stats.rejected / state.stats.totalFlagged;
         }
       }
     },
@@ -105,8 +105,8 @@ export const moderationSlice = createSlice({
             state.stats.pending--;
             
             // Update rates
-            state.stats.approvalRate = state.stats.approved / state.stats.totalFlagged || 0;
-            state.stats.rejectionRate = state.stats.rejected / state.stats.totalFlagged || 0;
+            state.stats.approvalRate = state.stats.approved / state.stats.totalFlagged;
+            state.stats.rejectionRate = state.stats.rejected / state.stats.totalFlagged;
           }
         });
       }
@@ -126,8 +126,8 @@ export const moderationSlice = createSlice({
             state.stats.pending--;
             
             // Update rates
-            state.stats.approvalRate = state.stats.approved / state.stats.totalFlagged || 0;
-            state.stats.rejectionRate = state.stats.rejected / state.stats.totalFlagged || 0;
+            state.stats.approvalRate = state.stats.approved / state.stats.totalFlagged;
+            state.stats.rejectionRate = state.stats.rejected / state.stats.totalFlagged;
           }
         });
       }
@@ -155,8 +155,8 @@ export const moderationSlice = createSlice({
       });
       
       // Update rates
-      state.stats.approvalRate = state.stats.approved / state.stats.totalFlagged || 0;
-      state.stats.rejectionRate = state.stats.rejected / state.stats.totalFlagged || 0;
+      state.stats.approvalRate = state.stats.approved / state.stats.totalFlagged;
+      state.stats.rejectionRate = state.stats.rejected / state.stats.totalFlagged;
     },
     bulkReject: (state, action: PayloadAction<string[]>) => {
       action.payload.forEach(id => {
@@ -181,8 +181,8 @@ export const moderationSlice = createSlice({
       });
       
       // Update rates
-      state.stats.approvalRate = state.stats.approved / state.stats.totalFlagged || 0;
-      state.stats.rejectionRate = state.stats.rejected / state.stats.totalFlagged || 0;
+      state.stats.approvalRate = state.stats.approved / state.stats.totalFlagged;
+      state.stats.rejectionRate = state.stats.rejected / state.stats.totalFlagged;
     },
     addNewFlaggedPost: (state, action: PayloadAction<Post>) => {
       // Check if post already exists
@@ -208,8 +208,8 @@ export const moderationSlice = createSlice({
         });
         
         state.stats.totalFlagged++;
-        state.stats.approvalRate = state.stats.approved / state.stats.totalFlagged || 0;
-        state.stats.rejectionRate = state.stats.rejected / state.stats.totalFlagged || 0;
+        state.stats.approvalRate = state.stats.approved / state.stats.totalFlagged;
+        state.stats.rejectionRate = state.stats.rejected / state.stats.totalFlagged;
       }
     }
   },
