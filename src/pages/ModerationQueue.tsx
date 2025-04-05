@@ -19,7 +19,8 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { 
   ChevronDown, Filter, Search, Check, X, AlertTriangle, 
-  MoreHorizontal, Twitter, Facebook, Instagram, ArrowUpDown
+  MoreHorizontal, Twitter, Facebook, Instagram, ArrowUpDown,
+  Brain
 } from "lucide-react";
 import { useAppSelector, useAppDispatch } from '@/lib/redux/hooks';
 import { bulkApprove, bulkReject } from '@/lib/redux/moderationSlice';
@@ -123,13 +124,24 @@ const PostCard = ({ post, onViewDetails }: { post: Post, onViewDetails: () => vo
             
             <p className="text-sm mt-3 mb-4">{post.content}</p>
             
-            <div className="flex items-center text-xs text-muted-foreground space-x-4">
+            <div className="flex items-center text-xs text-muted-foreground space-x-4 flex-wrap">
               <div className="flex items-center">
                 <span>AI Confidence: </span>
                 <Badge variant="outline" className="ml-1 bg-sentinel-500/10 text-sentinel-500 border-sentinel-500/30">
-                  {Math.round(post.confidence * 100)}%
+                  {Math.round((post.confidence || 0) * 100)}%
                 </Badge>
               </div>
+              
+              {post.modelAccuracy && (
+                <div className="flex items-center">
+                  <Brain className="h-3 w-3 mr-1" />
+                  <span>Model Accuracy: </span>
+                  <Badge variant="outline" className="ml-1 bg-accent/10 text-accent border-accent/30">
+                    {Math.round(post.modelAccuracy)}%
+                  </Badge>
+                </div>
+              )}
+              
               {post.metadata && (
                 <>
                   {post.metadata.likes !== undefined && (

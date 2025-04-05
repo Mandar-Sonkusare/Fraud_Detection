@@ -7,7 +7,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Post, categoryNames } from '@/lib/mock-data';
-import { Twitter, Facebook, Instagram } from "lucide-react";
+import { Twitter, Facebook, Instagram, Brain } from "lucide-react";
 import ModerateButtons from './ModerateButtons';
 
 interface PostDetailsProps {
@@ -109,13 +109,31 @@ const PostDetails: React.FC<PostDetailsProps> = ({ post, open, onOpenChange }) =
                 <div className="w-full bg-background rounded-full h-2.5">
                   <div 
                     className="bg-accent h-2.5 rounded-full" 
-                    style={{ width: `${post.confidence * 100}%` }}
+                    style={{ width: `${(post.confidence || 0) * 100}%` }}
                   ></div>
                 </div>
-                <span className="ml-2 text-sm">{Math.round(post.confidence * 100)}%</span>
+                <span className="ml-2 text-sm">{Math.round((post.confidence || 0) * 100)}%</span>
               </div>
             </div>
           </div>
+
+          {post.modelAccuracy && (
+            <div>
+              <h3 className="text-sm font-medium mb-2 flex items-center">
+                <Brain className="h-4 w-4 mr-1" />
+                ML Model Accuracy
+              </h3>
+              <div className="flex items-center">
+                <div className="w-full bg-background rounded-full h-2.5">
+                  <div 
+                    className="bg-sentinel-500 h-2.5 rounded-full" 
+                    style={{ width: `${post.modelAccuracy}%` }}
+                  ></div>
+                </div>
+                <span className="ml-2 text-sm">{Math.round(post.modelAccuracy)}%</span>
+              </div>
+            </div>
+          )}
 
           <div className="flex items-center text-xs text-muted-foreground space-x-6">
             {post.metadata && (
