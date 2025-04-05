@@ -14,7 +14,9 @@ export type ContentCategory =
   | 'scam'
   | 'phishing'
   | 'explicit_content'
-  | 'extremism';
+  | 'extremism'
+  | 'harassment' // Add this to match with contentAnalyzer.ts
+  | 'explicit';   // Add this to match with contentAnalyzer.ts
 
 export interface Post {
   id: string;
@@ -27,6 +29,7 @@ export interface Post {
   confidence: number;
   platform: 'twitter' | 'facebook' | 'instagram';
   status: 'pending' | 'approved' | 'rejected';
+  modelAccuracy?: number; // Add this property with optional type
   metadata?: {
     url?: string;
     likes?: number;

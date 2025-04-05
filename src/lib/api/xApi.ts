@@ -1,4 +1,3 @@
-
 import { v4 as uuidv4 } from 'uuid';
 import { Post, ContentCategory } from '@/lib/mock-data';
 import { analyzeContent } from '@/lib/ai/contentAnalyzer';
@@ -188,6 +187,7 @@ export const fetchTweets = async (): Promise<void> => {
           severity: analysis.severity,
           category: analysis.category as ContentCategory,
           confidence: analysis.confidence,
+          modelAccuracy: analysis.modelAccuracy,
           metadata: {
             likes: tweet.favorite_count,
             shares: tweet.retweet_count,

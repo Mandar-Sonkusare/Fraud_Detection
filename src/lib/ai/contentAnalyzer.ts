@@ -1,4 +1,3 @@
-
 // Enhanced AI content analyzer - Uses simulated NLP techniques
 import { ContentCategory } from '@/lib/mock-data';
 
