@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   Card, CardContent, CardDescription, CardHeader, CardTitle 
@@ -26,6 +25,7 @@ import { useAppSelector, useAppDispatch } from '@/lib/redux/hooks';
 import { bulkApprove, bulkReject } from '@/lib/redux/moderationSlice';
 import ModerateButtons from '@/components/moderation/ModerateButtons';
 import PostDetails from '@/components/moderation/PostDetails';
+import ContentTester from '@/components/moderation/ContentTester';
 import { startTwitterPolling, stopTwitterPolling } from '@/lib/api/xApi';
 
 const getRelativeTime = (date: Date) => {
@@ -205,6 +205,7 @@ const ModerationQueue = () => {
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('all');
+  const [showContentTester, setShowContentTester] = useState(false);
   
   useEffect(() => {
     startTwitterPolling();
@@ -289,7 +290,6 @@ const ModerationQueue = () => {
     setFilter(value);
   };
 
-  // Get the right posts for the current tab
   const getPostsForCurrentTab = () => {
     if (activeTab === 'all') return filteredPosts;
     return posts.filter(post => post.status === activeTab && 
@@ -307,6 +307,14 @@ const ModerationQueue = () => {
         <h1 className="text-2xl font-bold tracking-tight">Moderation Queue</h1>
         
         <div className="flex items-center gap-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => setShowContentTester(!showContentTester)}
+          >
+            <Brain className="mr-2 h-4 w-4" />
+            {showContentTester ? "Hide Content Tester" : "Test Content"}
+          </Button>
           <Button variant="outline" size="sm">
             Export
           </Button>
@@ -315,6 +323,12 @@ const ModerationQueue = () => {
           </Button>
         </div>
       </div>
+      
+      {showContentTester && (
+        <div className="mb-6">
+          <ContentTester />
+        </div>
+      )}
       
       <Card className="backdrop-blur-sm bg-card/80 border-border">
         <CardHeader>

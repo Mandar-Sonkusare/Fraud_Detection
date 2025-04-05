@@ -1,3 +1,4 @@
+
 // Enhanced AI content analyzer - Uses simulated NLP techniques
 import { ContentCategory } from '@/lib/mock-data';
 
@@ -23,6 +24,7 @@ interface AnalysisResult {
   category: ContentCategory | null;
   severity: 'low' | 'medium' | 'high';
   modelAccuracy?: number;
+  modelName?: string;
 }
 
 // Simulated ML model prediction accuracy (would be replaced by real model in production)
@@ -38,7 +40,8 @@ export const analyzeContent = (content: string): AnalysisResult => {
       confidence: 0,
       category: null,
       severity: 'low',
-      modelAccuracy: 0
+      modelAccuracy: 0,
+      modelName: "Sentinel Content Moderator v2.4"
     };
   }
   
@@ -105,6 +108,7 @@ export const analyzeContent = (content: string): AnalysisResult => {
     confidence: confidence,
     category: category,
     severity: severity,
-    modelAccuracy: modelAccuracy
+    modelAccuracy: modelAccuracy,
+    modelName: "Sentinel Content Moderator v2.4" // Simulated model name
   };
 };
