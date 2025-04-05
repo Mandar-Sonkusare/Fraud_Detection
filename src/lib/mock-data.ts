@@ -1,7 +1,6 @@
-
 import { 
   UserCircle, AlertTriangle, AlertOctagon, ShieldAlert, 
-  BadgeAlert, Skull, UserX2, MessageSquareWarning
+  BadgeAlert, Skull, UserX2, MessageSquareWarning, UserX, MessageSquare
 } from 'lucide-react';
 
 export type AlertSeverity = 'low' | 'medium' | 'high';
@@ -48,6 +47,8 @@ export const categoryIcons: Record<ContentCategory, React.ComponentType<any>> = 
   phishing: ShieldAlert,
   explicit_content: MessageSquareWarning,
   extremism: AlertOctagon,
+  harassment: UserX,        // Add harassment icon
+  explicit: MessageSquare   // Add explicit content icon
 };
 
 // Map category to friendly name
@@ -60,6 +61,8 @@ export const categoryNames: Record<ContentCategory, string> = {
   phishing: 'Phishing',
   explicit_content: 'Explicit Content',
   extremism: 'Extremism',
+  harassment: 'Harassment',        // Add harassment friendly name
+  explicit: 'Explicit Material'    // Add explicit content friendly name
 };
 
 // Generate mock data
