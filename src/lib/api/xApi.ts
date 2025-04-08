@@ -1,3 +1,4 @@
+
 import { v4 as uuidv4 } from 'uuid';
 import { Post, ContentCategory } from '@/lib/mock-data';
 import { analyzeContent } from '@/lib/ai/contentAnalyzer';
@@ -171,8 +172,9 @@ export const fetchTweets = async (): Promise<void> => {
     }
     
     // Process each tweet with AI analyzer
-    tweets.forEach(tweet => {
-      const analysis = analyzeContent(tweet.text);
+    for (const tweet of tweets) {
+      // Await the analysis result to properly access its properties
+      const analysis = await analyzeContent(tweet.text);
       
       if (analysis.isFlagged) {
         // Convert to our Post format
@@ -208,7 +210,7 @@ export const fetchTweets = async (): Promise<void> => {
           descriptionClassName: "text-foreground/80",
         });
       }
-    });
+    }
   } catch (error) {
     console.error('Error in tweet processing:', error);
   }

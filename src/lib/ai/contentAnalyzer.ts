@@ -1,4 +1,3 @@
-
 // Enhanced AI content analyzer with HateBERT integration
 import { ContentCategory } from '@/lib/mock-data';
 import { pipeline } from '@huggingface/transformers';
@@ -141,7 +140,7 @@ const initializeClassifier = async () => {
       hatebertClassifier = await pipeline(
         'text-classification',
         MODEL_NAME,
-        { topk: 1 }
+        { topK: 1 }
       );
       console.log("HateBERT classifier initialized successfully");
     } catch (error) {
