@@ -7,7 +7,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Post, categoryNames } from '@/lib/mock-data';
-import { Twitter, Facebook, Instagram, Brain } from "lucide-react";
+import { Twitter, Facebook, Instagram, Brain, AlertTriangle, Code } from "lucide-react";
 import ModerateButtons from './ModerateButtons';
 
 interface PostDetailsProps {
@@ -24,6 +24,15 @@ const PostDetails: React.FC<PostDetailsProps> = ({ post, open, onOpenChange }) =
       day: '2-digit',
       month: '2-digit',
       year: 'numeric'
+    }).format(date);
+  };
+
+  const getFormattedTime = (date: Date) => {
+    return new Intl.DateTimeFormat('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true
     }).format(date);
   };
 
@@ -52,6 +61,40 @@ const PostDetails: React.FC<PostDetailsProps> = ({ post, open, onOpenChange }) =
         return "";
     }
   };
+
+  // Simulated detected keywords based on content and category
+  const simulateDetectedKeywords = (content: string, category: string): string[] => {
+    const categoryKeywords: Record<string, string[]> = {
+      'hate_speech': ['hate', 'racist', 'banned', 'those people', 'should'],
+      'violence': ['attack', 'hurt', 'violent', 'kill', 'fight'],
+      'harassment': ['harass', 'bully', 'stalk', 'follow', 'unwanted'],
+      'misinformation': ['fake', 'conspiracy', 'hoax', 'lie', 'propaganda'],
+      'scam': ['money', 'offer', 'rich', 'free', 'limited'],
+      'explicit': ['nsfw', 'adult', 'explicit', 'dirty', 'inappropriate']
+    };
+    
+    const relevantKeywords = categoryKeywords[category] || [];
+    const contentLower = content.toLowerCase();
+    const detected = relevantKeywords.filter(keyword => contentLower.includes(keyword));
+    
+    // Always return some keywords for demonstration purposes
+    return detected.length > 0 ? detected : relevantKeywords.slice(0, 2);
+  };
+
+  // Simulate context score based on severity
+  const simulateContextScore = (severity: Post['severity']): number => {
+    switch (severity) {
+      case 'high': return 0.85 + Math.random() * 0.1;
+      case 'medium': return 0.55 + Math.random() * 0.15;
+      case 'low': return 0.25 + Math.random() * 0.2;
+      default: return 0.5;
+    }
+  };
+
+  const detectedKeywords = post.detectedKeywords || 
+    simulateDetectedKeywords(post.content, post.category);
+    
+  const contextScore = post.contextScore || simulateContextScore(post.severity);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -82,7 +125,7 @@ const PostDetails: React.FC<PostDetailsProps> = ({ post, open, onOpenChange }) =
                 {post.severity.charAt(0).toUpperCase() + post.severity.slice(1)} Severity
               </Badge>
               <span className="text-sm text-muted-foreground mt-1">
-                {getFormattedDate(post.timestamp)}
+                {getFormattedDate(post.timestamp)} {getFormattedTime(post.timestamp)}
               </span>
             </div>
           </div>
@@ -95,45 +138,84 @@ const PostDetails: React.FC<PostDetailsProps> = ({ post, open, onOpenChange }) =
               <p className="text-foreground">{post.content}</p>
             </div>
           </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <h3 className="text-sm font-medium mb-2">Category</h3>
-              <Badge className="bg-sentinel-500/20 text-sentinel-500 hover:bg-sentinel-500/30">
-                {categoryNames[post.category]}
-              </Badge>
-            </div>
-            <div>
-              <h3 className="text-sm font-medium mb-2">AI Confidence</h3>
-              <div className="flex items-center">
-                <div className="w-full bg-background rounded-full h-2.5">
-                  <div 
-                    className="bg-accent h-2.5 rounded-full" 
-                    style={{ width: `${(post.confidence || 0) * 100}%` }}
-                  ></div>
+          
+          <div className="flex flex-col gap-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <h3 className="text-sm font-medium mb-2">Category</h3>
+                <Badge className="bg-sentinel-500/20 text-sentinel-500 hover:bg-sentinel-500/30">
+                  {categoryNames[post.category]}
+                </Badge>
+              </div>
+              <div>
+                <h3 className="text-sm font-medium mb-2">AI Confidence</h3>
+                <div className="flex items-center">
+                  <div className="w-full bg-background rounded-full h-2.5">
+                    <div 
+                      className="bg-accent h-2.5 rounded-full" 
+                      style={{ width: `${(post.confidence || 0) * 100}%` }}
+                    ></div>
+                  </div>
+                  <span className="ml-2 text-sm">{Math.round((post.confidence || 0) * 100)}%</span>
                 </div>
-                <span className="ml-2 text-sm">{Math.round((post.confidence || 0) * 100)}%</span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              {post.modelAccuracy && (
+                <div>
+                  <h3 className="text-sm font-medium mb-2 flex items-center">
+                    <Brain className="h-4 w-4 mr-1" />
+                    ML Model Accuracy
+                  </h3>
+                  <div className="flex items-center">
+                    <div className="w-full bg-background rounded-full h-2.5">
+                      <div 
+                        className="bg-sentinel-500 h-2.5 rounded-full" 
+                        style={{ width: `${post.modelAccuracy}%` }}
+                      ></div>
+                    </div>
+                    <span className="ml-2 text-sm">{Math.round(post.modelAccuracy)}%</span>
+                  </div>
+                </div>
+              )}
+              
+              <div>
+                <h3 className="text-sm font-medium mb-2 flex items-center">
+                  <AlertTriangle className="h-4 w-4 mr-1" />
+                  Context Score
+                </h3>
+                <div className="flex items-center">
+                  <div className="w-full bg-background rounded-full h-2.5">
+                    <div 
+                      className={`${
+                        contextScore > 0.7 ? 'bg-alert-high' : 
+                        contextScore > 0.4 ? 'bg-alert-medium' : 
+                        'bg-alert-low'
+                      } h-2.5 rounded-full`}
+                      style={{ width: `${Math.round(contextScore * 100)}%` }}
+                    ></div>
+                  </div>
+                  <span className="ml-2 text-sm">{Math.round(contextScore * 100)}%</span>
+                </div>
+              </div>
+            </div>
+            
+            <div>
+              <h3 className="text-sm font-medium mb-2">Detected Keywords</h3>
+              <div className="flex flex-wrap gap-2">
+                {detectedKeywords.map((keyword, index) => (
+                  <Badge 
+                    key={index} 
+                    variant="outline" 
+                    className={`bg-${post.severity === 'high' ? 'alert-high' : post.severity === 'medium' ? 'alert-medium' : 'alert-low'}/10 border-${post.severity === 'high' ? 'alert-high' : post.severity === 'medium' ? 'alert-medium' : 'alert-low'}/30 font-mono text-xs`}
+                  >
+                    <Code className="h-3 w-3 mr-1" /> {keyword}
+                  </Badge>
+                ))}
               </div>
             </div>
           </div>
-
-          {post.modelAccuracy && (
-            <div>
-              <h3 className="text-sm font-medium mb-2 flex items-center">
-                <Brain className="h-4 w-4 mr-1" />
-                ML Model Accuracy
-              </h3>
-              <div className="flex items-center">
-                <div className="w-full bg-background rounded-full h-2.5">
-                  <div 
-                    className="bg-sentinel-500 h-2.5 rounded-full" 
-                    style={{ width: `${post.modelAccuracy}%` }}
-                  ></div>
-                </div>
-                <span className="ml-2 text-sm">{Math.round(post.modelAccuracy)}%</span>
-              </div>
-            </div>
-          )}
 
           <div className="flex items-center text-xs text-muted-foreground space-x-6">
             {post.metadata && (
@@ -149,6 +231,19 @@ const PostDetails: React.FC<PostDetailsProps> = ({ post, open, onOpenChange }) =
                 )}
               </>
             )}
+          </div>
+          
+          <div className="p-3 rounded-md bg-sentinel-500/5 border border-sentinel-500/20">
+            <div className="flex items-center">
+              <Brain className="h-4 w-4 text-sentinel-500 mr-2" />
+              <span className="text-sm font-medium">AI Model</span>
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {post.modelName || "Sentinel Content Moderator v2.5"}
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Analysis completed in {(Math.random() * 0.5 + 0.1).toFixed(2)} seconds
+            </p>
           </div>
 
           <Separator />

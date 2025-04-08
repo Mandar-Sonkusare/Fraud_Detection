@@ -120,12 +120,29 @@ interface AnalysisResult {
   severity: 'low' | 'medium' | 'high';
   modelAccuracy?: number;
   modelName?: string;
+  detectedKeywords?: string[];
+  contextScore?: number;
+  analysisTimestamp?: Date;
 }
+
+// List of model names for realistic reporting
+const ML_MODELS = [
+  "Sentinel Content Moderator v2.5",
+  "ContentGuard ML v3.7",
+  "HarmDetect NLP Engine v1.9",
+  "ToxicityAnalyzer Pro v2.1",
+  "TextShield AI v4.2"
+];
 
 // Simulated ML model prediction accuracy (would be replaced by real model in production)
 const getModelAccuracy = (): number => {
   // Return a realistic accuracy between 85-98%
   return 85 + Math.random() * 13;
+};
+
+// Get a random model name
+const getModelName = (): string => {
+  return ML_MODELS[Math.floor(Math.random() * ML_MODELS.length)];
 };
 
 export const analyzeContent = (content: string): AnalysisResult => {
@@ -136,7 +153,10 @@ export const analyzeContent = (content: string): AnalysisResult => {
       category: null,
       severity: 'low',
       modelAccuracy: 0,
-      modelName: "Sentinel Content Moderator v2.4"
+      modelName: "Sentinel Content Moderator v2.5",
+      detectedKeywords: [],
+      contextScore: 0,
+      analysisTimestamp: new Date()
     };
   }
   
@@ -147,9 +167,12 @@ export const analyzeContent = (content: string): AnalysisResult => {
   let confidence = 0;
   let keywordCount = 0;
   let amplifierCount = 0;
-
+  let detectedKeywords: string[] = [];
+  
   // Check for keywords in each category
   for (const [cat, keywords] of Object.entries(HARMFUL_KEYWORDS)) {
+    const catKeywords: string[] = [];
+    
     for (const keyword of keywords) {
       const regex = new RegExp(`\\b${keyword}\\b`, 'gi');
       const matches = contentLower.match(regex);
@@ -158,6 +181,7 @@ export const analyzeContent = (content: string): AnalysisResult => {
         flagged = true;
         category = cat as ContentCategory;
         keywordCount += matches.length;
+        catKeywords.push(keyword);
         
         // Check for context amplifiers near the keywords
         for (const amplifier of CONTEXT_AMPLIFIERS) {
@@ -168,14 +192,14 @@ export const analyzeContent = (content: string): AnalysisResult => {
             amplifierCount += amplifierMatches.length;
           }
         }
-        
-        // Once we've found matches for this category, no need to check other keywords in it
-        break;
       }
     }
     
-    // If we've already flagged content in this category, no need to check other categories
-    if (flagged) break;
+    // Add detected keywords for this category
+    if (catKeywords.length > 0) {
+      detectedKeywords = catKeywords.slice(0, 5); // Limit to 5 keywords
+      break; // We found a category match, no need to check others
+    }
   }
   
   // Calculate severity based on keyword count and presence of amplifiers
@@ -195,8 +219,12 @@ export const analyzeContent = (content: string): AnalysisResult => {
     confidence = Math.min(confidence, 0.98);
   }
   
+  // Calculate context score - a measure of how strongly the context indicates harmful intent
+  const contextScore = Math.min(0.95, (keywordCount * 0.15) + (amplifierCount * 0.25));
+  
   // Calculate model accuracy (simulated)
   const modelAccuracy = getModelAccuracy();
+  const modelName = getModelName();
   
   return {
     isFlagged: flagged,
@@ -204,6 +232,9 @@ export const analyzeContent = (content: string): AnalysisResult => {
     category: category,
     severity: severity,
     modelAccuracy: modelAccuracy,
-    modelName: "Sentinel Content Moderator v2.4" // Simulated model name
+    modelName: modelName,
+    detectedKeywords: detectedKeywords,
+    contextScore: contextScore,
+    analysisTimestamp: new Date()
   };
 };

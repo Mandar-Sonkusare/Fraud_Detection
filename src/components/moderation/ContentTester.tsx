@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Brain, AlertTriangle, CheckCircle } from "lucide-react";
+import { Brain, AlertTriangle, CheckCircle, Code, Search } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { categoryNames } from '@/lib/mock-data';
 import { analyzeContent } from '@/lib/ai/contentAnalyzer';
@@ -17,6 +17,9 @@ interface TestResult {
   severity: 'low' | 'medium' | 'high';
   modelAccuracy: number;
   modelName: string;
+  detectedKeywords?: string[];
+  contextScore?: number;
+  analysisTimestamp?: Date;
 }
 
 const ContentTester = () => {
@@ -38,7 +41,10 @@ const ContentTester = () => {
         category: analysis.category ? categoryNames[analysis.category] : null,
         severity: analysis.severity,
         modelAccuracy: analysis.modelAccuracy || 0,
-        modelName: analysis.modelName || "Sentinel Content Moderator"
+        modelName: analysis.modelName || "Sentinel Content Moderator",
+        detectedKeywords: analysis.detectedKeywords || [],
+        contextScore: analysis.contextScore || 0,
+        analysisTimestamp: analysis.analysisTimestamp || new Date()
       });
       setIsAnalyzing(false);
     }, 800);
@@ -51,6 +57,23 @@ const ContentTester = () => {
       case 'high': return "text-alert-high";
       default: return "";
     }
+  };
+
+  const getSeverityBgColor = (severity: string) => {
+    switch (severity) {
+      case 'low': return "bg-alert-low/10 border-alert-low/30";
+      case 'medium': return "bg-alert-medium/10 border-alert-medium/30";
+      case 'high': return "bg-alert-high/10 border-alert-high/30";
+      default: return "";
+    }
+  };
+
+  const formatTime = (date: Date) => {
+    return date.toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    });
   };
 
   return (
@@ -160,8 +183,51 @@ const ContentTester = () => {
                 </div>
               </div>
               
-              <div className="mt-2 text-xs text-muted-foreground">
-                Analysis performed by: {result.modelName}
+              {result.isFlagged && result.detectedKeywords && result.detectedKeywords.length > 0 && (
+                <div className="mt-4">
+                  <p className="text-sm font-medium mb-2">Detected Keywords</p>
+                  <div className="flex flex-wrap gap-2">
+                    {result.detectedKeywords.map((keyword, index) => (
+                      <Badge key={index} variant="outline" className={`${getSeverityBgColor(result.severity)} font-mono text-xs`}>
+                        <Code className="h-3 w-3 mr-1" /> {keyword}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {result.contextScore !== undefined && (
+                <div className="mt-4">
+                  <p className="text-sm font-medium mb-1">Context Score</p>
+                  <div className="flex items-center">
+                    <div className="w-full bg-background rounded-full h-2.5">
+                      <div 
+                        className={`${
+                          result.contextScore > 0.7 ? 'bg-alert-high' : 
+                          result.contextScore > 0.4 ? 'bg-alert-medium' : 
+                          'bg-alert-low'
+                        } h-2.5 rounded-full`}
+                        style={{ width: `${Math.round(result.contextScore * 100)}%` }}
+                      ></div>
+                    </div>
+                    <span className="ml-2 text-sm">{Math.round(result.contextScore * 100)}%</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Measures the strength of contextual indicators of harmful intent
+                  </p>
+                </div>
+              )}
+              
+              <div className="mt-4 text-xs text-muted-foreground flex justify-between items-center">
+                <div>
+                  Analysis performed by: {result.modelName}
+                </div>
+                {result.analysisTimestamp && (
+                  <div className="flex items-center">
+                    <Search className="h-3 w-3 mr-1" />
+                    {formatTime(result.analysisTimestamp)}
+                  </div>
+                )}
               </div>
             </>
           )}
