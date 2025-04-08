@@ -4,12 +4,107 @@ import { ContentCategory } from '@/lib/mock-data';
 
 // Expanded harmful keywords to detect
 const HARMFUL_KEYWORDS = {
-  hate_speech: ['hate', 'racist', 'racism', 'discrimination', 'bigot', 'bigotry', 'sexist', 'homophobic'],
-  violence: ['kill', 'attack', 'hurt', 'violent', 'bomb', 'shoot', 'assault', 'death', 'murder'],
-  harassment: ['harass', 'stalking', 'bully', 'bullying', 'threaten', 'intimidate', 'doxx'],
-  misinformation: ['fake news', 'conspiracy', 'hoax', 'misinformation', 'disinformation', 'propaganda'],
-  scam: ['scam', 'fraud', 'free money', 'get rich quick', 'pyramid scheme', 'ponzi', 'crypto scam'],
-  explicit: ['nsfw', 'xxx', 'porn', 'explicit', 'adult content'],
+  hate_speech: [
+    'hate', 'racist', 'racism', 'discrimination', 'bigot', 'bigotry', 'sexist', 'homophobic',
+    'prejudice', 'xenophobia', 'islamophobia', 'antisemitism', 'bigoted', 'supremacist', 'nazi',
+    'whites', 'blacks', 'jews', 'muslims', 'immigrants', 'foreigners', 'ethnics', 'slur', 'derogatory',
+    'offensive', 'intolerant', 'abusive', 'nigger', 'kike', 'spic', 'chink', 'wetback', 'raghead',
+    'towelhead', 'allah akbar', 'genocide', 'ethnic cleansing', 'white power', 'black power', 'segregation',
+    'apartheid', 'prejudiced', 'stereotyping', 'stereotypical', 'stereotype', 'bias', 'biased', 'hater',
+    'misogyny', 'misogynist', 'misandry', 'sexist', 'transphobic', 'homophobic', 'queerphobic', 'biphobic',
+    'ageist', 'ableist', 'classist', 'elitist', 'nationalist', 'fascist', 'nazi', 'neo-nazi', 'kkk',
+    'white supremacy', 'black supremacy', 'religious hatred', 'racial hatred', 'racial profiling', 
+    'oppression', 'oppressive', 'subjugation', 'marginalization', 'prejudicial', 'discriminatory',
+    'segregationist', 'supremacy', 'superiority', 'inferior', 'subhuman', 'dehumanize', 'dehumanizing',
+    'othering', 'us versus them', 'purge', 'purification', 'racial purity', 'pure race', 'mongrel',
+    'halfbreed', 'mulatto', 'miscegeny', 'race traitor', 'race mixing', 'cultural marxism',
+    'replacement theory', 'white genocide', 'great replacement', 'jewish question', 'jewish conspiracy'
+  ],
+  
+  violence: [
+    'kill', 'attack', 'hurt', 'violent', 'bomb', 'shoot', 'assault', 'death', 'murder',
+    'aggression', 'intimidation', 'brutality', 'bloodshed', 'slaughter', 'massacre', 'carnage',
+    'butchery', 'gore', 'warfare', 'combat', 'fight', 'battle', 'skirmish', 'riot', 'insurrection',
+    'rebellion', 'revolt', 'revolution', 'coup', 'overthrow', 'terrorism', 'terrorist', 'militants',
+    'guerrilla', 'insurgent', 'extremist', 'radical', 'fundamentalist', 'jihadist', 'martyr',
+    'kamikaze', 'suicide bomber', 'bombing', 'explosion', 'detonate', 'blow up', 'gunfire',
+    'shooting', 'sniper', 'gunman', 'shooter', 'assassin', 'hitman', 'mercenary', 'militant',
+    'soldier', 'warrior', 'fighter', 'brawler', 'thug', 'gangster', 'mobster', 'criminal',
+    'felon', 'outlaw', 'bandit', 'pirate', 'hijacker', 'kidnapper', 'abductor', 'hostage',
+    'captive', 'prisoner', 'detainee', 'inmate', 'convict', 'offender', 'perpetrator',
+    'assailant', 'aggressor', 'attacker', 'assaulter', 'mugger', 'robber', 'burglar',
+    'looter', 'vandal', 'arsonist', 'pyromaniac', 'saboteur', 'anarchist', 'chaos',
+    'mayhem', 'pandemonium', 'havoc', 'destruction', 'devastation', 'annihilation'
+  ],
+  
+  harassment: [
+    'harass', 'stalking', 'bully', 'bullying', 'threaten', 'intimidate', 'doxx',
+    'vexation', 'aggravation', 'annoyance', 'pestering', 'badgering', 'bothering',
+    'hassling', 'hounding', 'plaguing', 'tormenting', 'disturbing', 'molesting',
+    'provoking', 'agitating', 'irritating', 'exasperating', 'perturbing', 'cyberbullying',
+    'trolling', 'flaming', 'griefing', 'baiting', 'catfishing', 'mobbing', 'dogpiling',
+    'pile-on', 'gang-up', 'witch hunt', 'cancel', 'cancelling', 'shaming', 'humiliating',
+    'embarrassing', 'mocking', 'ridiculing', 'belittling', 'demeaning', 'degrading',
+    'unwanted', 'unwelcome', 'uninvited', 'intrusive', 'invasive', 'boundary',
+    'boundaries', 'consent', 'nonconsensual', 'follow', 'following', 'stalk', 'spy',
+    'spying', 'monitor', 'monitoring', 'track', 'tracking', 'surveilling', 'surveillance',
+    'watching', 'leering', 'ogling', 'staring', 'gawking', 'lurking', 'creeping',
+    'shadowing', 'pursuing', 'chasing', 'hunting', 'preying', 'prowling',
+    'intimidation', 'coercion', 'blackmail', 'extortion', 'threats', 'menacing',
+    'terrorizing', 'frightening', 'scaring', 'alarming', 'panic', 'distress',
+    'obsessive', 'fixated', 'infatuated', 'enamored', 'lovesick', 'smitten',
+    'restraining order', 'no contact', 'cease and desist', 'distance', 'avoidance'
+  ],
+  
+  misinformation: [
+    'fake news', 'conspiracy', 'hoax', 'misinformation', 'disinformation', 'propaganda',
+    'lie', 'falsehood', 'fabrication', 'deception', 'fraud', 'trick', 'myth',
+    'rumor', 'gossip', 'hearsay', 'speculation', 'conjecture', 'assumption',
+    'distortion', 'misrepresentation', 'exaggeration', 'hyperbole', 'embellishment', 
+    'spin', 'slant', 'bias', 'prejudice', 'untruth', 'scam', 'sham', 'pretense',
+    'charade', 'facade', 'cover-up', 'plot', 'scheme', 'collusion', 'cabal', 
+    'frame-up', 'setup', 'sting', 'ruse', 'ploy', 'gimmick', 'stunt', 'trickery',
+    'deceit', 'duplicity', 'treachery', 'betrayal', 'double-dealing', 'two-faced',
+    'hypocrisy', 'manipulation', 'brainwashing', 'indoctrination', 'gaslighting',
+    'mislead', 'delude', 'deceive', 'fool', 'dupe', 'hoodwink', 'bamboozle',
+    'con', 'swindle', 'cheat', 'bluff', 'feint', 'dodge', 'evasion', 'sidestep',
+    'misdirection', 'diversion', 'distraction', 'red herring', 'smokescreen',
+    'camouflage', 'disguise', 'mask', 'veil', 'cloak', 'shroud', 'obscure',
+    'cloud', 'fog', 'haze', 'murk', 'confusion', 'bewilderment', 'perplexity'
+  ],
+  
+  scam: [
+    'scam', 'fraud', 'free money', 'get rich quick', 'pyramid scheme', 'ponzi', 'crypto scam',
+    'swindle', 'con', 'deceit', 'cheat', 'forgery', 'giveaway', 'lottery win',
+    'inheritance', 'instant wealth', 'miracle investment', 'multi-level marketing',
+    'chain letter', 'phishing', 'spoofing', 'malware', 'dupe', 'mark', 'sucker',
+    'victim', 'prey', 'target', 'gullible', 'naive', 'trusting', 'credulous',
+    'unsuspecting', 'innocent', 'unwary', 'careless', 'reckless', 'rash', 
+    'impulsive', 'foolish', 'silly', 'stupid', 'idiotic', 'moronic', 'ludicrous',
+    'ridiculous', 'absurd', 'preposterous', 'outrageous', 'unbelievable',
+    'implausible', 'doubtful', 'questionable', 'suspicious', 'shady', 'dodgy',
+    'sketchy', 'murky', 'unclear', 'vague', 'obscure', 'cryptic', 'mysterious',
+    'puzzling', 'confusing', 'bewildering', 'inexplicable', 'incomprehensible',
+    'unintelligible', 'chaotic', 'lawless', 'unruly', 'wild', 'untamed', 'rough',
+    'tough', 'hard', 'difficult', 'challenging', 'demanding', 'strenuous', 'arduous'
+  ],
+  
+  explicit: [
+    'nsfw', 'xxx', 'porn', 'explicit', 'adult content', 'pornographic', 'erotic',
+    'obscene', 'lewd', 'lascivious', 'salacious', 'prurient', 'licentious',
+    'debauched', 'depraved', 'perverted', 'indecent', 'vulgar', 'crude', 'coarse',
+    'raunchy', 'racy', 'naughty', 'dirty', 'filthy', 'smutty', 'nasty', 'gross',
+    'disgusting', 'offensive', 'shocking', 'scandalous', 'outrageous', 'provocative',
+    'suggestive', 'titillating', 'arousing', 'sensual', 'seductive', 'sexy', 'hot',
+    'steamy', 'sultry', 'lustful', 'passionate', 'intimate', 'carnal', 'fleshly',
+    'physical', 'bodily', 'sexual', 'mature', 'restricted', 'adult-only', 'X-rated',
+    'R-rated', 'unrated', 'uncensored', 'raw', 'unfiltered', 'graphic', 'detailed',
+    'vivid', 'hardcore', 'softcore', 'fetish', 'kink', 'BDSM', 'bondage', 'discipline',
+    'domination', 'submission', 'sadism', 'masochism', 'taboo', 'forbidden', 'illicit',
+    'immoral', 'unethical', 'sinful', 'wicked', 'evil', 'corrupt', 'degenerate',
+    'debased', 'perverse', 'twisted', 'sick', 'warped', 'abnormal', 'deviant',
+    'unnatural', 'bizarre', 'weird', 'freaky', 'strange', 'odd', 'unusual', 'eccentric'
+  ],
 };
 
 // Context words that increase the severity when found near harmful words
