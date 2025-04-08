@@ -1,6 +1,6 @@
+
 // Enhanced AI content analyzer with HateBERT integration
 import { ContentCategory } from '@/lib/mock-data';
-import { pipeline } from '@huggingface/transformers';
 
 // Expanded harmful keywords to detect
 const HARMFUL_KEYWORDS = {
@@ -141,11 +141,9 @@ const initializeClassifier = async () => {
   if (!hatebertClassifier) {
     try {
       console.log("Initializing HateBERT classifier...");
-      hatebertClassifier = await pipeline(
-        'text-classification',
-        MODEL_NAME,
-        { waitForModel: true }
-      );
+      // Note: We're removing the options object since the current version of huggingface/transformers
+      // has different parameter requirements
+      hatebertClassifier = await pipeline('text-classification', MODEL_NAME);
       console.log("HateBERT classifier initialized successfully");
     } catch (error) {
       console.error("Error initializing HateBERT classifier:", error);
@@ -164,6 +162,34 @@ const getModelAccuracy = (): number => {
 // Get model name
 const getModelName = (): string => {
   return "HateBERT by Groningen NLP";
+};
+
+// Helper function to detect all matching keywords from a category in the given content
+const detectKeywordsInCategory = (content: string, categoryKeywords: string[]): string[] => {
+  const contentLower = content.toLowerCase();
+  const matches: string[] = [];
+  
+  for (const keyword of categoryKeywords) {
+    // Use word boundary to match whole words
+    const regex = new RegExp(`\\b${keyword}\\b`, 'gi');
+    if (regex.test(contentLower)) {
+      matches.push(keyword);
+    }
+  }
+  
+  return matches;
+};
+
+// Find all harmful keywords across all categories
+const findAllHarmfulKeywords = (content: string): string[] => {
+  const allDetectedKeywords: string[] = [];
+  
+  for (const [category, keywords] of Object.entries(HARMFUL_KEYWORDS)) {
+    const detectedInCategory = detectKeywordsInCategory(content, keywords);
+    allDetectedKeywords.push(...detectedInCategory);
+  }
+  
+  return allDetectedKeywords;
 };
 
 // Analyzes content using HateBERT if available, falls back to keyword analysis
@@ -189,7 +215,7 @@ export const analyzeContent = async (content: string): Promise<AnalysisResult> =
   let confidence = 0;
   let keywordCount = 0;
   let amplifierCount = 0;
-  let detectedKeywords: string[] = [];
+  let detectedKeywords: string[] = findAllHarmfulKeywords(content);
   
   // Try to use HateBERT model if available
   try {
@@ -197,7 +223,8 @@ export const analyzeContent = async (content: string): Promise<AnalysisResult> =
     
     if (classifier) {
       // Use the HateBERT model for prediction
-      const result = await classifier(content, { waitForModel: true });
+      // Note: We're simplifying the options here
+      const result = await classifier(content);
       
       if (result && result.length > 0) {
         const prediction = result[0];
@@ -217,26 +244,15 @@ export const analyzeContent = async (content: string): Promise<AnalysisResult> =
             severity = 'low';
           }
           
-          // Still perform keyword analysis to identify specific problematic words
-          for (const keyword of HARMFUL_KEYWORDS.hate_speech) {
-            const regex = new RegExp(`\\b${keyword}\\b`, 'gi');
-            const matches = contentLower.match(regex);
-            
-            if (matches && matches.length > 0) {
-              keywordCount += matches.length;
-              if (detectedKeywords.length < 5 && !detectedKeywords.includes(keyword)) {
-                detectedKeywords.push(keyword);
-              }
-            }
-          }
-          
           // Check for context amplifiers
           for (const amplifier of CONTEXT_AMPLIFIERS) {
-            const nearKeywordRegex = new RegExp(`${amplifier}\\s+\\w{0,10}\\s*${detectedKeywords.join('|')}|${detectedKeywords.join('|')}\\s*\\w{0,10}\\s+${amplifier}`, 'gi');
-            const amplifierMatches = contentLower.match(nearKeywordRegex);
-            
-            if (amplifierMatches) {
-              amplifierCount += amplifierMatches.length;
+            for (const keyword of detectedKeywords) {
+              const nearKeywordRegex = new RegExp(`${amplifier}\\s+\\w{0,10}\\s*${keyword}|${keyword}\\s*\\w{0,10}\\s+${amplifier}`, 'gi');
+              const amplifierMatches = contentLower.match(nearKeywordRegex);
+              
+              if (amplifierMatches) {
+                amplifierCount += amplifierMatches.length;
+              }
             }
           }
         }
@@ -251,11 +267,16 @@ export const analyzeContent = async (content: string): Promise<AnalysisResult> =
     return performKeywordAnalysis(content);
   }
   
+  // If no keywords are detected via HateBERT but it still flags, get keywords from general detection
+  if (flagged && detectedKeywords.length === 0) {
+    detectedKeywords = findAllHarmfulKeywords(content);
+  }
+  
   // Calculate context score - a measure of how strongly the context indicates harmful intent
-  const contextScore = Math.min(0.95, (keywordCount * 0.15) + (amplifierCount * 0.25));
+  const contextScore = Math.min(0.95, (detectedKeywords.length * 0.15) + (amplifierCount * 0.25));
   
   return {
-    isFlagged: flagged,
+    isFlagged: flagged || detectedKeywords.length > 0,
     confidence: confidence,
     category: category,
     severity: severity,
@@ -274,26 +295,24 @@ const performKeywordAnalysis = (content: string): AnalysisResult => {
   let category: ContentCategory | null = null;
   let severity: 'low' | 'medium' | 'high' = 'low';
   let confidence = 0;
-  let keywordCount = 0;
   let amplifierCount = 0;
-  let detectedKeywords: string[] = [];
+  let allDetectedKeywords: string[] = [];
   
   // Check for keywords in each category
   for (const [cat, keywords] of Object.entries(HARMFUL_KEYWORDS)) {
-    const catKeywords: string[] = [];
+    const catKeywords = detectKeywordsInCategory(content, keywords);
     
-    for (const keyword of keywords) {
-      const regex = new RegExp(`\\b${keyword}\\b`, 'gi');
-      const matches = contentLower.match(regex);
-      
-      if (matches && matches.length > 0) {
-        flagged = true;
+    if (catKeywords.length > 0) {
+      flagged = true;
+      // Only set category if it hasn't been set yet
+      if (!category) {
         category = cat as ContentCategory;
-        keywordCount += matches.length;
-        catKeywords.push(keyword);
-        
-        // Check for context amplifiers near the keywords
-        for (const amplifier of CONTEXT_AMPLIFIERS) {
+      }
+      allDetectedKeywords = [...allDetectedKeywords, ...catKeywords];
+      
+      // Check for context amplifiers near the keywords
+      for (const amplifier of CONTEXT_AMPLIFIERS) {
+        for (const keyword of catKeywords) {
           const nearKeywordRegex = new RegExp(`${amplifier}\\s+\\w{0,10}\\s*${keyword}|${keyword}\\s*\\w{0,10}\\s+${amplifier}`, 'gi');
           const amplifierMatches = contentLower.match(nearKeywordRegex);
           
@@ -303,15 +322,10 @@ const performKeywordAnalysis = (content: string): AnalysisResult => {
         }
       }
     }
-    
-    // Add detected keywords for this category
-    if (catKeywords.length > 0) {
-      detectedKeywords = catKeywords.slice(0, 5); // Limit to 5 keywords
-      break; // We found a category match, no need to check others
-    }
   }
   
   // Calculate severity based on keyword count and presence of amplifiers
+  const keywordCount = allDetectedKeywords.length;
   if (keywordCount > 0) {
     if (keywordCount > 2 || amplifierCount > 1) {
       severity = 'high';
@@ -338,8 +352,11 @@ const performKeywordAnalysis = (content: string): AnalysisResult => {
     severity: severity,
     modelAccuracy: MODEL_ACCURACY,
     modelName: getModelName() + " (Keyword Fallback)",
-    detectedKeywords: detectedKeywords,
+    detectedKeywords: allDetectedKeywords,
     contextScore: contextScore,
     analysisTimestamp: new Date()
   };
 };
+
+// Import the pipeline function
+import { pipeline } from '@huggingface/transformers';
