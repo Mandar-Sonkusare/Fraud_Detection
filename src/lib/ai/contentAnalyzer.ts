@@ -81,12 +81,16 @@ const HARMFUL_KEYWORDS = {
     'victim', 'prey', 'target', 'gullible', 'naive', 'trusting', 'credulous',
     'unsuspecting', 'innocent', 'unwary', 'careless', 'reckless', 'rash', 
     'impulsive', 'foolish', 'silly', 'stupid', 'idiotic', 'moronic', 'ludicrous',
-    'ridiculous', 'absurd', 'preposterous', 'outrageous', 'unbelievable',
-    'implausible', 'doubtful', 'questionable', 'suspicious', 'shady', 'dodgy',
-    'sketchy', 'murky', 'unclear', 'vague', 'obscure', 'cryptic', 'mysterious',
-    'puzzling', 'confusing', 'bewildering', 'inexplicable', 'incomprehensible',
-    'unintelligible', 'chaotic', 'lawless', 'unruly', 'wild', 'untamed', 'rough',
-    'tough', 'hard', 'difficult', 'challenging', 'demanding', 'strenuous', 'arduous'
+    'ridiculous', 'absurd', 'preposterous', 'outrageous', 'provocative',
+    'suggestive', 'titillating', 'arousing', 'sensual', 'seductive', 'sexy', 'hot',
+    'steamy', 'sultry', 'lustful', 'passionate', 'intimate', 'carnal', 'fleshly',
+    'physical', 'bodily', 'sexual', 'mature', 'restricted', 'adult-only', 'X-rated',
+    'R-rated', 'unrated', 'uncensored', 'raw', 'unfiltered', 'graphic', 'detailed',
+    'vivid', 'hardcore', 'softcore', 'fetish', 'kink', 'BDSM', 'bondage', 'discipline',
+    'domination', 'submission', 'sadism', 'masochism', 'taboo', 'forbidden', 'illicit',
+    'immoral', 'unethical', 'sinful', 'wicked', 'evil', 'corrupt', 'degenerate',
+    'debased', 'perverse', 'twisted', 'sick', 'warped', 'abnormal', 'deviant',
+    'unnatural', 'bizarre', 'weird', 'freaky', 'strange', 'odd', 'unusual', 'eccentric'
   ],
   
   explicit: [
@@ -140,7 +144,7 @@ const initializeClassifier = async () => {
       hatebertClassifier = await pipeline(
         'text-classification',
         MODEL_NAME,
-        { topK: 1 }
+        { waitForModel: true }
       );
       console.log("HateBERT classifier initialized successfully");
     } catch (error) {
@@ -193,7 +197,7 @@ export const analyzeContent = async (content: string): Promise<AnalysisResult> =
     
     if (classifier) {
       // Use the HateBERT model for prediction
-      const result = await classifier(content, { wait_for_model: true });
+      const result = await classifier(content, { waitForModel: true });
       
       if (result && result.length > 0) {
         const prediction = result[0];
