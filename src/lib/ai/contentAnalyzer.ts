@@ -141,9 +141,9 @@ const initializeClassifier = async () => {
   if (!hatebertClassifier) {
     try {
       console.log("Initializing HateBERT classifier...");
-      // Note: We're removing the options object since the current version of huggingface/transformers
-      // has different parameter requirements
-      hatebertClassifier = await pipeline('text-classification', MODEL_NAME);
+      hatebertClassifier = await pipeline('text-classification', MODEL_NAME, {
+        waitForModel: true
+      });
       console.log("HateBERT classifier initialized successfully");
     } catch (error) {
       console.error("Error initializing HateBERT classifier:", error);
@@ -189,7 +189,8 @@ const findAllHarmfulKeywords = (content: string): string[] => {
     allDetectedKeywords.push(...detectedInCategory);
   }
   
-  return allDetectedKeywords;
+  // Remove duplicates by converting to Set and back to array
+  return [...new Set(allDetectedKeywords)];
 };
 
 // Analyzes content using HateBERT if available, falls back to keyword analysis
@@ -223,7 +224,6 @@ export const analyzeContent = async (content: string): Promise<AnalysisResult> =
     
     if (classifier) {
       // Use the HateBERT model for prediction
-      // Note: We're simplifying the options here
       const result = await classifier(content);
       
       if (result && result.length > 0) {
@@ -296,7 +296,7 @@ const performKeywordAnalysis = (content: string): AnalysisResult => {
   let severity: 'low' | 'medium' | 'high' = 'low';
   let confidence = 0;
   let amplifierCount = 0;
-  let allDetectedKeywords: string[] = [];
+  let allDetectedKeywords: string[] = findAllHarmfulKeywords(content);
   
   // Check for keywords in each category
   for (const [cat, keywords] of Object.entries(HARMFUL_KEYWORDS)) {
@@ -308,7 +308,6 @@ const performKeywordAnalysis = (content: string): AnalysisResult => {
       if (!category) {
         category = cat as ContentCategory;
       }
-      allDetectedKeywords = [...allDetectedKeywords, ...catKeywords];
       
       // Check for context amplifiers near the keywords
       for (const amplifier of CONTEXT_AMPLIFIERS) {
@@ -360,3 +359,4 @@ const performKeywordAnalysis = (content: string): AnalysisResult => {
 
 // Import the pipeline function
 import { pipeline } from '@huggingface/transformers';
+
