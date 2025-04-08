@@ -27,14 +27,15 @@ const ContentTester = () => {
   const [result, setResult] = useState<TestResult | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-  const handleTestContent = () => {
+  const handleTestContent = async () => {
     if (!content.trim()) return;
     
     setIsAnalyzing(true);
     
-    // Simulate processing delay for UX
-    setTimeout(() => {
-      const analysis = analyzeContent(content);
+    try {
+      // Call the analyzeContent function which now returns a Promise
+      const analysis = await analyzeContent(content);
+      
       setResult({
         isFlagged: analysis.isFlagged,
         confidence: analysis.confidence,
@@ -46,8 +47,11 @@ const ContentTester = () => {
         contextScore: analysis.contextScore || 0,
         analysisTimestamp: analysis.analysisTimestamp || new Date()
       });
+    } catch (error) {
+      console.error("Error analyzing content:", error);
+    } finally {
       setIsAnalyzing(false);
-    }, 800);
+    }
   };
   
   const getSeverityColor = (severity: string) => {
@@ -102,7 +106,7 @@ const ContentTester = () => {
             className="w-full"
             disabled={isAnalyzing || !content.trim()}
           >
-            {isAnalyzing ? 'Analyzing...' : 'Analyze Content'}
+            {isAnalyzing ? 'Analyzing with HateBERT...' : 'Analyze Content'}
           </Button>
           
           {result && (
@@ -235,7 +239,7 @@ const ContentTester = () => {
       </CardContent>
       
       <CardFooter className="flex flex-col items-start text-xs text-muted-foreground border-t border-border/50 pt-4">
-        <p>This tool uses the same content analysis engine as the automated moderation system.</p>
+        <p>This tool uses the HateBERT pre-trained model for content analysis.</p>
       </CardFooter>
     </Card>
   );

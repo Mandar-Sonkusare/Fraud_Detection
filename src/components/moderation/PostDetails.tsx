@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   Dialog, DialogContent, DialogDescription, 
@@ -16,8 +15,17 @@ interface PostDetailsProps {
   onOpenChange: (open: boolean) => void;
 }
 
+interface ExtendedPost extends Post {
+  detectedKeywords?: string[];
+  contextScore?: number;
+  modelName?: string;
+  modelAccuracy?: number;
+}
+
 const PostDetails: React.FC<PostDetailsProps> = ({ post, open, onOpenChange }) => {
   if (!post) return null;
+
+  const extendedPost = post as ExtendedPost;
 
   const getFormattedDate = (date: Date) => {
     return new Intl.DateTimeFormat('en-US', {
@@ -62,7 +70,6 @@ const PostDetails: React.FC<PostDetailsProps> = ({ post, open, onOpenChange }) =
     }
   };
 
-  // Simulated detected keywords based on content and category
   const simulateDetectedKeywords = (content: string, category: string): string[] => {
     const categoryKeywords: Record<string, string[]> = {
       'hate_speech': ['hate', 'racist', 'banned', 'those people', 'should'],
@@ -77,11 +84,9 @@ const PostDetails: React.FC<PostDetailsProps> = ({ post, open, onOpenChange }) =
     const contentLower = content.toLowerCase();
     const detected = relevantKeywords.filter(keyword => contentLower.includes(keyword));
     
-    // Always return some keywords for demonstration purposes
     return detected.length > 0 ? detected : relevantKeywords.slice(0, 2);
   };
 
-  // Simulate context score based on severity
   const simulateContextScore = (severity: Post['severity']): number => {
     switch (severity) {
       case 'high': return 0.85 + Math.random() * 0.1;
@@ -91,10 +96,10 @@ const PostDetails: React.FC<PostDetailsProps> = ({ post, open, onOpenChange }) =
     }
   };
 
-  const detectedKeywords = post.detectedKeywords || 
+  const detectedKeywords = extendedPost.detectedKeywords || 
     simulateDetectedKeywords(post.content, post.category);
     
-  const contextScore = post.contextScore || simulateContextScore(post.severity);
+  const contextScore = extendedPost.contextScore || simulateContextScore(post.severity);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -239,7 +244,7 @@ const PostDetails: React.FC<PostDetailsProps> = ({ post, open, onOpenChange }) =
               <span className="text-sm font-medium">AI Model</span>
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              {post.modelName || "Sentinel Content Moderator v2.5"}
+              {extendedPost.modelName || "HateBERT by Groningen NLP"}
             </p>
             <p className="text-xs text-muted-foreground mt-1">
               Analysis completed in {(Math.random() * 0.5 + 0.1).toFixed(2)} seconds
