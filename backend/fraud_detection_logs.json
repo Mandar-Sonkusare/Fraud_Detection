@@ -1,0 +1,118 @@
+[
+  {
+    "timestamp": "2026-03-16T21:12:31.970777",
+    "text": "Fr e e g i f t f o r y o u!!! click-here-now",
+    "prediction": "fraudulent",
+    "confidence": 0.95,
+    "risk_score": 100.0,
+    "detected_patterns": [
+      "voucher_scam"
+    ],
+    "fraud_type": "phishing",
+    "user_info": {}
+  },
+  {
+    "timestamp": "2026-03-16T21:12:31.975990",
+    "text": "c0ngr@tulati0ns! You have w0n a fr33 pr1ze. Cl1ck the l1nk bel0w to cla1m it before it exp1res.",
+    "prediction": "fraudulent",
+    "confidence": 0.95,
+    "risk_score": 100.0,
+    "detected_patterns": [
+      "voucher_scam"
+    ],
+    "fraud_type": "phishing",
+    "user_info": {}
+  },
+  {
+    "timestamp": "2026-03-16T21:12:44.384201",
+    "text": "madam pls redeem this play store voucher to avail 400 $ directly into your google account https://sm.in",
+    "prediction": "fraudulent",
+    "confidence": 0.5823706738701964,
+    "risk_score": 100.0,
+    "detected_patterns": [
+      "shortened_url",
+      "money_amount",
+      "large_amount"
+    ],
+    "fraud_type": "phishing",
+    "user_info": {}
+  },
+  {
+    "timestamp": "2026-03-16T21:12:44.394286",
+    "text": "pls give your social security number for the safety of your account",
+    "prediction": "fraudulent",
+    "confidence": 0.4599351249599776,
+    "risk_score": 83.79805374879933,
+    "detected_patterns": [],
+    "fraud_type": "phishing",
+    "user_info": {}
+  },
+  {
+    "timestamp": "2026-03-16T21:12:44.399448",
+    "text": "Fr e e g i f t f o r y o u!!! click-here-now",
+    "prediction": "fraudulent",
+    "confidence": 0.95,
+    "risk_score": 100.0,
+    "detected_patterns": [
+      "voucher_scam"
+    ],
+    "fraud_type": "phishing",
+    "user_info": {}
+  },
+  {
+    "timestamp": "2026-03-16T21:12:44.405015",
+    "text": "c0ngr@tulati0ns! You have w0n a fr33 pr1ze",
+    "prediction": "normal",
+    "confidence": 0.638189889223968,
+    "risk_score": 19.14569667671904,
+    "detected_patterns": [],
+    "fraud_type": "legitimate",
+    "user_info": {}
+  },
+  {
+    "timestamp": "2026-03-16T21:12:44.410196",
+    "text": "Your order #12345 has been confirmed",
+    "prediction": "normal",
+    "confidence": 0.47971610053058134,
+    "risk_score": 14.39148301591744,
+    "detected_patterns": [],
+    "fraud_type": "legitimate",
+    "user_info": {}
+  },
+  {
+    "timestamp": "2026-03-16T21:12:52.246491",
+    "text": "c0ngr@tulati0ns! You have w0n a fr33 pr1ze. Cl1ck the l1nk bel0w to cla1m it before it exp1res.",
+    "prediction": "fraudulent",
+    "confidence": 0.95,
+    "risk_score": 100.0,
+    "detected_patterns": [
+      "voucher_scam"
+    ],
+    "fraud_type": "phishing",
+    "user_info": {}
+  },
+  {
+    "timestamp": "2026-03-16T21:13:01.038490",
+    "text": "c0ngr@tulati0ns! You have w0n a fr33 pr1ze. Cl1ck the l1nk bel0w to cla1m it before it exp1res.",
+    "prediction": "fraudulent",
+    "confidence": 0.95,
+    "risk_score": 100.0,
+    "detected_patterns": [
+      "voucher_scam"
+    ],
+    "fraud_type": "phishing",
+    "user_info": {}
+  },
+  {
+    "timestamp": "2026-03-16T21:13:19.899094",
+    "text": "c0ngr@tulati0ns! You\u2019ve w0n a fr33 pr1ze. Cl1ck the l1nk bel0w to cla1m it bef0re it exp1res.",
+    "prediction": "fraudulent",
+    "confidence": 0.95,
+    "risk_score": 100.0,
+    "detected_patterns": [
+      "voucher_scam"
+    ],
+    "fraud_type": "phishing",
+    "user_info": {}
+  }
+]

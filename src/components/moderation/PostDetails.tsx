@@ -188,7 +188,7 @@ const PostDetails: React.FC<PostDetailsProps> = ({ post, open, onOpenChange }) =
               <div>
                 <h3 className="text-sm font-medium mb-2 flex items-center">
                   <AlertTriangle className="h-4 w-4 mr-1" />
-                  Context Score
+                  Sentiment Score
                 </h3>
                 <div className="flex items-center">
                   <div className="w-full bg-background rounded-full h-2.5">

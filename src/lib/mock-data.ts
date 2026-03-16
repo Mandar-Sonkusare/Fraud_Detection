@@ -6,16 +6,11 @@ import {
 export type AlertSeverity = 'low' | 'medium' | 'high';
 
 export type ContentCategory = 
-  | 'misinformation' 
-  | 'hate_speech' 
-  | 'violence' 
-  | 'cyberbullying' 
-  | 'scam'
   | 'phishing'
-  | 'explicit_content'
-  | 'extremism'
-  | 'harassment' // Add this to match with contentAnalyzer.ts
-  | 'explicit';   // Add this to match with contentAnalyzer.ts
+  | 'scam'
+  | 'impersonation'
+  | 'financial_fraud'
+  | 'fake_giveaway';
 
 export interface Post {
   id: string;
@@ -39,37 +34,26 @@ export interface Post {
 
 // Map category to icon
 export const categoryIcons: Record<ContentCategory, React.ComponentType<any>> = {
-  misinformation: AlertTriangle,
-  hate_speech: AlertOctagon,
-  violence: Skull,
-  cyberbullying: UserX2,
-  scam: BadgeAlert,
   phishing: ShieldAlert,
-  explicit_content: MessageSquareWarning,
-  extremism: AlertOctagon,
-  harassment: UserX,        // Add harassment icon
-  explicit: MessageSquare   // Add explicit content icon
+  scam: BadgeAlert,
+  impersonation: UserX2,
+  financial_fraud: AlertOctagon,
+  fake_giveaway: AlertTriangle
 };
 
 // Map category to friendly name
-export const categoryNames: Record<ContentCategory, string> = {
-  misinformation: 'Misinformation',
-  hate_speech: 'Hate Speech',
-  violence: 'Violence',
-  cyberbullying: 'Cyberbullying',
-  scam: 'Scam',
+export const categoryNames: Record<string, string> = {
   phishing: 'Phishing',
-  explicit_content: 'Explicit Content',
-  extremism: 'Extremism',
-  harassment: 'Harassment',        // Add harassment friendly name
-  explicit: 'Explicit Material'    // Add explicit content friendly name
+  scam: 'Scam',
+  impersonation: 'Impersonation',
+  financial_fraud: 'Financial Fraud',
+  fake_giveaway: 'Fake Giveaway'
 };
 
 // Generate mock data
 export const generateMockPosts = (count: number): Post[] => {
   const categories: ContentCategory[] = [
-    'misinformation', 'hate_speech', 'violence', 'cyberbullying', 
-    'scam', 'phishing', 'explicit_content', 'extremism'
+    'phishing', 'scam', 'impersonation', 'financial_fraud', 'fake_giveaway'
   ];
   
   const severities: AlertSeverity[] = ['low', 'medium', 'high'];
@@ -77,14 +61,21 @@ export const generateMockPosts = (count: number): Post[] => {
   const statuses = ['pending', 'approved', 'rejected'];
   
   const mockContent = [
-    "Check out this new cure for all diseases! Scientists don't want you to know this secret! #fakenews",
-    "I can't stand those people from the south side of town. They should all be banned from our country!",
-    "Someone should teach that politician a lesson with a baseball bat. I'm not kidding.",
-    "You're the stupidest person I've ever seen online. Kill yourself, nobody would miss you.",
-    "Free money! Just send your credit card details to claim your prize! Guaranteed legitimate!",
-    "Click here to reset your password immediately or your account will be locked: bit.ly/fake-site",
-    "Sharing explicit photos that shouldn't be on social media platforms.",
-    "Join our movement to overthrow the corrupt system by any means necessary. Violence is justified.",
+    "URGENT: Your Bank of America account has been suspended. Click here to verify: bit.ly/fake-bank",
+    "Congratulations! You have won $10,000 in our lottery. Claim your prize now: scam-site.com",
+    "Official Chase Customer Care: We detected suspicious activity. Verify your account: verify-chase.com",
+    "FREE MONEY! Double your investment in 24 hours. No risk, guaranteed returns. Sign up now!",
+    "Limited time offer! Get rich quick with our exclusive cryptocurrency investment opportunity.",
+    "Your PayPal account will be closed in 24 hours. Click here to prevent closure: paypal-verify.net",
+    "You have been selected for a free iPhone 15. Claim now: free-iphone-giveaway.com",
+    "Official Amazon Support: Your account needs verification. Click here: amazon-verify.org",
+    "Investment opportunity: Turn $500 into $5000 in just 7 days. Guaranteed returns!",
+    "Security alert: Unauthorized login detected on your account. Secure now: secure-account.com",
+    "You've won! Claim your prize worth $5,000. Click here: winner-claim.com",
+    "Official message from Wells Fargo: Verify your identity to continue using our services.",
+    "Get rich quick! Join our exclusive trading program. Minimum investment: $100",
+    "Your Netflix subscription is about to expire. Renew now: netflix-renew.com",
+    "Free Bitcoin giveaway! Send 0.1 BTC to receive 1 BTC back. Limited time offer!",
   ];
   
   const usernames = [
@@ -134,14 +125,11 @@ export const generateMockStats = () => {
     pending: 72,
     resolved: 1286,
     flaggedByCategory: {
-      misinformation: 428,
-      hate_speech: 312,
-      violence: 156,
-      cyberbullying: 205,
-      scam: 89,
-      phishing: 76,
-      explicit_content: 54,
-      extremism: 38
+      phishing: 342,
+      scam: 428,
+      impersonation: 256,
+      financial_fraud: 189,
+      fake_giveaway: 143
     },
     flaggedByPlatform: {
       twitter: 729,

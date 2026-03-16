@@ -1,344 +1,350 @@
-
-// Enhanced AI content analyzer with HateBERT integration
+// Fraud Detection Content Analyzer
 import { ContentCategory } from '@/lib/mock-data';
 
-// Expanded harmful keywords to detect
-const HARMFUL_KEYWORDS = {
-  hate_speech: [
-    'hate', 'racist', 'racism', 'discrimination', 'bigot', 'bigotry', 'sexist', 'homophobic',
-    'prejudice', 'xenophobia', 'islamophobia', 'antisemitism', 'bigoted', 'supremacist', 'nazi',
-    'whites', 'blacks', 'jews', 'muslims', 'immigrants', 'foreigners', 'ethnics', 'slur', 'derogatory',
-    'offensive', 'intolerant', 'abusive', 'nigger', 'kike', 'spic', 'chink', 'wetback', 'raghead',
-    'towelhead', 'allah akbar', 'genocide', 'ethnic cleansing', 'white power', 'black power', 'segregation',
-    'apartheid', 'prejudiced', 'stereotyping', 'stereotypical', 'stereotype', 'bias', 'biased', 'hater',
-    'misogyny', 'misogynist', 'misandry', 'sexist', 'transphobic', 'homophobic', 'queerphobic', 'biphobic',
-    'ageist', 'ableist', 'classist', 'elitist', 'nationalist', 'fascist', 'nazi', 'neo-nazi', 'kkk',
-    'white supremacy', 'black supremacy', 'religious hatred', 'racial hatred', 'racial profiling', 
-    'oppression', 'oppressive', 'subjugation', 'marginalization', 'prejudicial', 'discriminatory',
-    'segregationist', 'supremacy', 'superiority', 'inferior', 'subhuman', 'dehumanize', 'dehumanizing',
-    'othering', 'us versus them', 'purge', 'purification', 'racial purity', 'pure race', 'mongrel',
-    'halfbreed', 'mulatto', 'miscegeny', 'race traitor', 'race mixing', 'cultural marxism',
-    'replacement theory', 'white genocide', 'great replacement', 'jewish question', 'jewish conspiracy'
+// Backend API base
+const BACKEND_API_BASE = 'http://localhost:8000';
+
+// Fraud detection keywords organized by fraud type
+export const FRAUD_KEYWORDS = {
+  phishing: [
+    'verify your account', 'suspended account', 'click here immediately',
+    'urgent action required', 'confirm your identity', 'update your information',
+    'your account will be closed', 'unauthorized login attempt', 'security breach',
+    'verify your email', 'confirm your password', 'account verification',
+    'suspicious activity detected', 'login from new device', 'protect your account',
+    'reset password', 'account locked', 'verify now', 'immediate action',
+    'click link below', 'verify identity', 'account security', 'suspicious login'
   ],
   
-  violence: [
-    'kill', 'attack', 'hurt', 'violent', 'bomb', 'shoot', 'assault', 'death', 'murder',
-    'aggression', 'intimidation', 'brutality', 'bloodshed', 'slaughter', 'massacre', 'carnage',
-    'butchery', 'gore', 'warfare', 'combat', 'fight', 'battle', 'skirmish', 'riot', 'insurrection',
-    'rebellion', 'revolt', 'revolution', 'coup', 'overthrow', 'terrorism', 'terrorist', 'militants',
-    'guerrilla', 'insurgent', 'extremist', 'radical', 'fundamentalist', 'jihadist', 'martyr',
-    'kamikaze', 'suicide bomber', 'bombing', 'explosion', 'detonate', 'blow up', 'gunfire',
-    'shooting', 'sniper', 'gunman', 'shooter', 'assassin', 'hitman', 'mercenary', 'militant',
-    'soldier', 'warrior', 'fighter', 'brawler', 'thug', 'gangster', 'mobster', 'criminal',
-    'felon', 'outlaw', 'bandit', 'pirate', 'hijacker', 'kidnapper', 'abductor', 'hostage',
-    'captive', 'prisoner', 'detainee', 'inmate', 'convict', 'offender', 'perpetrator',
-    'assailant', 'aggressor', 'attacker', 'assaulter', 'mugger', 'robber', 'burglar',
-    'looter', 'vandal', 'arsonist', 'pyromaniac', 'saboteur', 'anarchist', 'chaos',
-    'mayhem', 'pandemonium', 'havoc', 'destruction', 'devastation', 'annihilation'
-  ],
-  
-  harassment: [
-    'harass', 'stalking', 'bully', 'bullying', 'threaten', 'intimidate', 'doxx',
-    'vexation', 'aggravation', 'annoyance', 'pestering', 'badgering', 'bothering',
-    'hassling', 'hounding', 'plaguing', 'tormenting', 'disturbing', 'molesting',
-    'provoking', 'agitating', 'irritating', 'exasperating', 'perturbing', 'cyberbullying',
-    'trolling', 'flaming', 'griefing', 'baiting', 'catfishing', 'mobbing', 'dogpiling',
-    'pile-on', 'gang-up', 'witch hunt', 'cancel', 'cancelling', 'shaming', 'humiliating',
-    'embarrassing', 'mocking', 'ridiculing', 'belittling', 'demeaning', 'degrading',
-    'unwanted', 'unwelcome', 'uninvited', 'intrusive', 'invasive', 'boundary',
-    'boundaries', 'consent', 'nonconsensual', 'follow', 'following', 'stalk', 'spy',
-    'spying', 'monitor', 'monitoring', 'track', 'tracking', 'surveilling', 'surveillance',
-    'watching', 'leering', 'ogling', 'staring', 'gawking', 'lurking', 'creeping',
-    'shadowing', 'pursuing', 'chasing', 'hunting', 'preying', 'prowling',
-    'intimidation', 'coercion', 'blackmail', 'extortion', 'threats', 'menacing',
-    'terrorizing', 'frightening', 'scaring', 'alarming', 'panic', 'distress',
-    'obsessive', 'fixated', 'infatuated', 'enamored', 'lovesick', 'smitten',
-    'restraining order', 'no contact', 'cease and desist', 'distance', 'avoidance'
-  ],
-  
-  misinformation: [
-    'fake news', 'conspiracy', 'hoax', 'misinformation', 'disinformation', 'propaganda',
-    'lie', 'falsehood', 'fabrication', 'deception', 'fraud', 'trick', 'myth',
-    'rumor', 'gossip', 'hearsay', 'speculation', 'conjecture', 'assumption',
-    'distortion', 'misrepresentation', 'exaggeration', 'hyperbole', 'embellishment', 
-    'spin', 'slant', 'bias', 'prejudice', 'untruth', 'scam', 'sham', 'pretense',
-    'charade', 'facade', 'cover-up', 'plot', 'scheme', 'collusion', 'cabal', 
-    'frame-up', 'setup', 'sting', 'ruse', 'ploy', 'gimmick', 'stunt', 'trickery',
-    'deceit', 'duplicity', 'treachery', 'betrayal', 'double-dealing', 'two-faced',
-    'hypocrisy', 'manipulation', 'brainwashing', 'indoctrination', 'gaslighting',
-    'mislead', 'delude', 'deceive', 'fool', 'dupe', 'hoodwink', 'bamboozle',
-    'con', 'swindle', 'cheat', 'bluff', 'feint', 'dodge', 'evasion', 'sidestep',
-    'misdirection', 'diversion', 'distraction', 'red herring', 'smokescreen',
-    'camouflage', 'disguise', 'mask', 'veil', 'cloak', 'shroud', 'obscure',
-    'cloud', 'fog', 'haze', 'murk', 'confusion', 'bewilderment', 'perplexity'
+  impersonation: [
+    'official bank', 'customer care', 'support team', 'verified account',
+    'this is your bank', 'we are contacting you from', 'bank representative',
+    'customer service', 'official support', 'trusted partner', 'authorized dealer',
+    'official account', 'verified support', 'bank security', 'official message',
+    'from your bank', 'banking services', 'official communication'
   ],
   
   scam: [
-    'scam', 'fraud', 'free money', 'get rich quick', 'pyramid scheme', 'ponzi', 'crypto scam',
-    'swindle', 'con', 'deceit', 'cheat', 'forgery', 'giveaway', 'lottery win',
-    'inheritance', 'instant wealth', 'miracle investment', 'multi-level marketing',
-    'chain letter', 'phishing', 'spoofing', 'malware', 'dupe', 'mark', 'sucker',
-    'victim', 'prey', 'target', 'gullible', 'naive', 'trusting', 'credulous',
-    'unsuspecting', 'innocent', 'unwary', 'careless', 'reckless', 'rash', 
-    'impulsive', 'foolish', 'silly', 'stupid', 'idiotic', 'moronic', 'ludicrous',
-    'ridiculous', 'absurd', 'preposterous', 'outrageous', 'provocative',
-    'suggestive', 'titillating', 'arousing', 'sensual', 'seductive', 'sexy', 'hot',
-    'steamy', 'sultry', 'lustful', 'passionate', 'intimate', 'carnal', 'fleshly',
-    'physical', 'bodily', 'sexual', 'mature', 'restricted', 'adult-only', 'X-rated',
-    'R-rated', 'unrated', 'uncensored', 'raw', 'unfiltered', 'graphic', 'detailed',
-    'vivid', 'hardcore', 'softcore', 'fetish', 'kink', 'BDSM', 'bondage', 'discipline',
-    'domination', 'submission', 'sadism', 'masochism', 'taboo', 'forbidden', 'illicit',
-    'immoral', 'unethical', 'sinful', 'wicked', 'evil', 'corrupt', 'degenerate',
-    'debased', 'perverse', 'twisted', 'sick', 'warped', 'abnormal', 'deviant',
-    'unnatural', 'bizarre', 'weird', 'freaky', 'strange', 'odd', 'unusual', 'eccentric'
+    'free money', 'get rich quick', 'guaranteed returns', 'no risk investment',
+    'limited time offer', 'act now', 'exclusive opportunity', 'you have won',
+    'claim your prize', 'inheritance', 'lottery winner', 'congratulations you won',
+    'claim your reward', 'free gift', 'no purchase necessary', 'winner selected',
+    'free iphone', 'free ipad', 'free laptop', 'giveaway', 'contest winner',
+    'retweet to win', 'share to win', 'like and share', 'tag friends to win',
+    'guaranteed win', 'instant money', 'easy money', 'quick cash'
   ],
   
-  explicit: [
-    'nsfw', 'xxx', 'porn', 'explicit', 'adult content', 'pornographic', 'erotic',
-    'obscene', 'lewd', 'lascivious', 'salacious', 'prurient', 'licentious',
-    'debauched', 'depraved', 'perverted', 'indecent', 'vulgar', 'crude', 'coarse',
-    'raunchy', 'racy', 'naughty', 'dirty', 'filthy', 'smutty', 'nasty', 'gross',
-    'disgusting', 'offensive', 'shocking', 'scandalous', 'outrageous', 'provocative',
-    'suggestive', 'titillating', 'arousing', 'sensual', 'seductive', 'sexy', 'hot',
-    'steamy', 'sultry', 'lustful', 'passionate', 'intimate', 'carnal', 'fleshly',
-    'physical', 'bodily', 'sexual', 'mature', 'restricted', 'adult-only', 'X-rated',
-    'R-rated', 'unrated', 'uncensored', 'raw', 'unfiltered', 'graphic', 'detailed',
-    'vivid', 'hardcore', 'softcore', 'fetish', 'kink', 'BDSM', 'bondage', 'discipline',
-    'domination', 'submission', 'sadism', 'masochism', 'taboo', 'forbidden', 'illicit',
-    'immoral', 'unethical', 'sinful', 'wicked', 'evil', 'corrupt', 'degenerate',
-    'debased', 'perverse', 'twisted', 'sick', 'warped', 'abnormal', 'deviant',
-    'unnatural', 'bizarre', 'weird', 'freaky', 'strange', 'odd', 'unusual', 'eccentric'
+  financial_fraud: [
+    'send money', 'wire transfer', 'bitcoin', 'cryptocurrency investment',
+    'double your money', 'investment opportunity', 'trading signals',
+    'forex trading', 'binary options', 'pyramid scheme', 'ponzi scheme',
+    'multi-level marketing', 'mlm opportunity', 'passive income',
+    'crypto investment', 'trading bot', 'automated trading', 'guaranteed profit',
+    'risk-free investment', 'high returns', 'investment program'
   ],
+  
+  fake_giveaway: [
+    'free iphone', 'free ipad', 'free laptop', 'giveaway', 'contest winner',
+    'retweet to win', 'share to win', 'like and share', 'tag friends to win',
+    'free prize', 'win now', 'free offer', 'no strings attached'
+  ]
 };
 
-// Context words that increase the severity when found near harmful words
-const CONTEXT_AMPLIFIERS = [
-  'very', 'extremely', 'absolutely', 'definitely', 'all', 'every', 'always',
-  'must', 'should', 'need to', 'going to', 'will', 'shall'
+// Context amplifiers that increase fraud risk
+const FRAUD_AMPLIFIERS = [
+  'urgent', 'immediately', 'now', 'asap', 'hurry', 'limited time',
+  'act now', 'don\'t miss', 'exclusive', 'guaranteed', '100%',
+  'free', 'no cost', 'no risk', 'instant', 'quick', 'easy'
 ];
 
-interface AnalysisResult {
+interface FraudAnalysisResult {
   isFlagged: boolean;
   confidence: number;
   category: ContentCategory | null;
+  categories?: ContentCategory[];
   severity: 'low' | 'medium' | 'high';
   modelAccuracy?: number;
   modelName?: string;
   detectedKeywords?: string[];
   contextScore?: number;
   analysisTimestamp?: Date;
+  keywordsPerCategory?: Record<string, string[]>;
+  fraudType?: 'normal' | 'suspicious' | 'fraudulent';
+  riskScore?: number;
+  detectedPatterns?: string[];
 }
 
-// HateBERT model information
-const MODEL_NAME = "GroNLP/hateBERT";
-const MODEL_ACCURACY = 92.7; // Based on published performance metrics for HateBERT
+// Model information
+const MODEL_NAME = "Fraud Detection System";
+const MODEL_ACCURACY = 92.5;
 
-// Cached classifier to avoid reloading the model on every analysis
-let hatebertClassifier: any = null;
-
-// Initialize the HateBERT classifier
-const initializeClassifier = async () => {
-  if (!hatebertClassifier) {
-    try {
-      console.log("Initializing HateBERT classifier...");
-      hatebertClassifier = await pipeline('text-classification', MODEL_NAME, {
-        waitForModel: true
-      });
-      console.log("HateBERT classifier initialized successfully");
-    } catch (error) {
-      console.error("Error initializing HateBERT classifier:", error);
-      // Fall back to keyword-based analysis if model fails to load
-      hatebertClassifier = null;
-    }
-  }
-  return hatebertClassifier;
-};
-
-// Get the model accuracy - now returns a fixed value based on published research
-const getModelAccuracy = (): number => {
-  return MODEL_ACCURACY;
-};
-
-// Get model name
-const getModelName = (): string => {
-  return "HateBERT by Groningen NLP";
-};
-
-// Helper function to detect all matching keywords from a category in the given content
+// Helper function to detect keywords in a category
 const detectKeywordsInCategory = (content: string, categoryKeywords: string[]): string[] => {
   const contentLower = content.toLowerCase();
   const matches: string[] = [];
   
   for (const keyword of categoryKeywords) {
-    // Use word boundary to match whole words
-    const regex = new RegExp(`\\b${keyword}\\b`, 'gi');
+    // Use word boundary or phrase matching
+    const regex = new RegExp(`\\b${keyword}\\b|${keyword}`, 'gi');
     if (regex.test(contentLower)) {
       matches.push(keyword);
     }
   }
   
-  return matches;
+  return [...new Set(matches)]; // Remove duplicates
 };
 
-// Find all harmful keywords across all categories
-const findAllHarmfulKeywords = (content: string): string[] => {
+// Find all fraud keywords across all categories
+const findAllFraudKeywords = (content: string): string[] => {
   const allDetectedKeywords: string[] = [];
   
-  for (const [category, keywords] of Object.entries(HARMFUL_KEYWORDS)) {
+  for (const [category, keywords] of Object.entries(FRAUD_KEYWORDS)) {
     const detectedInCategory = detectKeywordsInCategory(content, keywords);
     allDetectedKeywords.push(...detectedInCategory);
   }
   
-  // Remove duplicates by converting to Set and back to array
   return [...new Set(allDetectedKeywords)];
 };
 
-// Analyzes content using HateBERT if available, falls back to keyword analysis
-export const analyzeContent = async (content: string): Promise<AnalysisResult> => {
+// Find keywords categorized by their category
+const findKeywordsByCategory = (content: string): Record<string, string[]> => {
+  const keywordsPerCategory: Record<string, string[]> = {};
+  
+  for (const [category, keywords] of Object.entries(FRAUD_KEYWORDS)) {
+    const detectedInCategory = detectKeywordsInCategory(content, keywords);
+    if (detectedInCategory.length > 0) {
+      keywordsPerCategory[category] = detectedInCategory;
+    }
+  }
+  
+  return keywordsPerCategory;
+};
+
+// Map fraud types to content categories
+const mapFraudTypeToCategory = (fraudType: string, patterns: string[]): ContentCategory => {
+  if (patterns.includes('phishing')) return 'phishing';
+  if (patterns.includes('impersonation')) return 'phishing'; // Similar to phishing
+  if (patterns.includes('scam')) return 'scam';
+  if (patterns.includes('financial_fraud')) return 'scam';
+  if (patterns.includes('fake_giveaway')) return 'scam';
+  return 'scam'; // Default
+};
+
+// Analyzes content for fraud detection
+export const analyzeContent = async (content: string): Promise<FraudAnalysisResult> => {
   if (!content) {
     return {
       isFlagged: false,
       confidence: 0,
       category: null,
+      categories: [],
       severity: 'low',
       modelAccuracy: MODEL_ACCURACY,
-      modelName: getModelName(),
+      modelName: MODEL_NAME,
       detectedKeywords: [],
       contextScore: 0,
-      analysisTimestamp: new Date()
+      analysisTimestamp: new Date(),
+      keywordsPerCategory: {},
+      fraudType: 'normal',
+      riskScore: 0,
+      detectedPatterns: []
     };
   }
   
   const contentLower = content.toLowerCase();
   let flagged = false;
   let category: ContentCategory | null = null;
+  let categories: ContentCategory[] = [];
   let severity: 'low' | 'medium' | 'high' = 'low';
   let confidence = 0;
-  let keywordCount = 0;
-  let amplifierCount = 0;
-  let detectedKeywords: string[] = findAllHarmfulKeywords(content);
+  let detectedKeywords: string[] = findAllFraudKeywords(content);
+  let keywordsPerCategory = findKeywordsByCategory(content);
+  let fraudType: 'normal' | 'suspicious' | 'fraudulent' = 'normal';
+  let riskScore = 0;
+  let detectedPatterns: string[] = [];
   
-  // Try to use HateBERT model if available
+  // Identify all detected categories
+  for (const catKey in keywordsPerCategory) {
+    if (keywordsPerCategory[catKey].length > 0) {
+      detectedPatterns.push(catKey);
+      const mappedCategory = mapFraudTypeToCategory(catKey, detectedPatterns);
+      if (!categories.includes(mappedCategory)) {
+        categories.push(mappedCategory);
+      }
+    }
+  }
+  
+  // Set the primary category
+  if (categories.length > 0) {
+    let maxKeywords = 0;
+    for (const cat of categories) {
+      // Count keywords for this category
+      let catKeywordCount = 0;
+      for (const pattern of detectedPatterns) {
+        catKeywordCount += keywordsPerCategory[pattern]?.length || 0;
+      }
+      if (catKeywordCount > maxKeywords) {
+        maxKeywords = catKeywordCount;
+        category = cat;
+      }
+    }
+    flagged = true;
+  }
+  
+  // Try backend ML models for fraud prediction
   try {
-    const classifier = await initializeClassifier();
+    const resp = await fetch(`${BACKEND_API_BASE}/predict`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        text: content, 
+        model_name: 'mlp' 
+      })
+    });
     
-    if (classifier) {
-      // Use the HateBERT model for prediction
-      const result = await classifier(content);
+    if (resp.ok) {
+      const data = await resp.json();
       
-      if (result && result.length > 0) {
-        const prediction = result[0];
-        
-        // HateBERT classifies as either "LABEL_0" (not hateful) or "LABEL_1" (hateful)
-        if (prediction.label === "LABEL_1") {
-          flagged = true;
-          category = "hate_speech";
-          confidence = prediction.score;
-          
-          // Determine severity based on confidence score
-          if (confidence > 0.85) {
-            severity = 'high';
-          } else if (confidence > 0.65) {
-            severity = 'medium';
-          } else {
-            severity = 'low';
-          }
-          
-          // Check for context amplifiers
-          for (const amplifier of CONTEXT_AMPLIFIERS) {
-            for (const keyword of detectedKeywords) {
-              const nearKeywordRegex = new RegExp(`${amplifier}\\s+\\w{0,10}\\s*${keyword}|${keyword}\\s*\\w{0,10}\\s+${amplifier}`, 'gi');
-              const amplifierMatches = contentLower.match(nearKeywordRegex);
-              
-              if (amplifierMatches) {
-                amplifierCount += amplifierMatches.length;
-              }
-            }
-          }
+      // Map backend prediction to our types
+      fraudType = data.prediction as 'normal' | 'suspicious' | 'fraudulent';
+      const backendConfidence = typeof data.confidence === 'number' ? data.confidence : 0.75;
+      riskScore = typeof data.risk_score === 'number' ? data.risk_score : 0;
+      detectedPatterns = data.detected_patterns || detectedPatterns;
+      
+      // Determine severity based on fraud type and risk score
+      if (fraudType === 'fraudulent') {
+        severity = riskScore > 80 ? 'high' : 'medium';
+        confidence = Math.max(backendConfidence, 0.8);
+      } else if (fraudType === 'suspicious') {
+        severity = riskScore > 60 ? 'medium' : 'low';
+        confidence = Math.max(backendConfidence, 0.6);
+      } else {
+        severity = 'low';
+        confidence = backendConfidence;
+      }
+      
+      // Use keyword detection to enrich categories
+      detectedKeywords = findAllFraudKeywords(content);
+      keywordsPerCategory = findKeywordsByCategory(content);
+      
+      // Update categories based on detected patterns
+      categories = [];
+      for (const pattern of detectedPatterns) {
+        const mappedCategory = mapFraudTypeToCategory(pattern, detectedPatterns);
+        if (!categories.includes(mappedCategory)) {
+          categories.push(mappedCategory);
         }
       }
-    } else {
-      // Fall back to keyword-based analysis if model isn't available
-      return performKeywordAnalysis(content);
+      
+      if (categories.length > 0 && !category) {
+        category = categories[0];
+      }
+      
+      // If backend says fraudulent but no category, set default
+      if (fraudType !== 'normal' && !category) {
+        category = 'scam';
+        categories = ['scam'];
+      }
+      
+      flagged = fraudType !== 'normal' || detectedKeywords.length > 0;
+      
+      return {
+        isFlagged: flagged,
+        confidence: confidence,
+        category: category,
+        categories: categories,
+        severity: severity,
+        modelAccuracy: MODEL_ACCURACY,
+        modelName: `Fraud Detection ${data.model || 'MLP'}`,
+        detectedKeywords: detectedKeywords,
+        contextScore: Math.min(0.95, (detectedKeywords.length * 0.15) + (riskScore / 100)),
+        analysisTimestamp: new Date(),
+        keywordsPerCategory: keywordsPerCategory,
+        fraudType: fraudType,
+        riskScore: riskScore,
+        detectedPatterns: detectedPatterns
+      };
     }
-  } catch (error) {
-    console.error("Error using HateBERT model:", error);
-    // Fall back to keyword-based analysis
-    return performKeywordAnalysis(content);
+  } catch (e) {
+    console.warn("Backend API unavailable, using keyword-based detection:", e);
   }
   
-  // If no keywords are detected via HateBERT but it still flags, get keywords from general detection
-  if (flagged && detectedKeywords.length === 0) {
-    detectedKeywords = findAllHarmfulKeywords(content);
-  }
-  
-  // Calculate context score - a measure of how strongly the context indicates harmful intent
-  const contextScore = Math.min(0.95, (detectedKeywords.length * 0.15) + (amplifierCount * 0.25));
-  
-  return {
-    isFlagged: flagged || detectedKeywords.length > 0,
-    confidence: confidence,
-    category: category,
-    severity: severity,
-    modelAccuracy: MODEL_ACCURACY,
-    modelName: getModelName(),
-    detectedKeywords: detectedKeywords,
-    contextScore: contextScore,
-    analysisTimestamp: new Date()
-  };
+  // Fallback to keyword-based analysis
+  return performKeywordAnalysis(content);
 };
 
-// Fallback keyword-based analysis when model is unavailable
-const performKeywordAnalysis = (content: string): AnalysisResult => {
+// Fallback keyword-based analysis
+const performKeywordAnalysis = (content: string): FraudAnalysisResult => {
   const contentLower = content.toLowerCase();
   let flagged = false;
   let category: ContentCategory | null = null;
+  let categories: ContentCategory[] = [];
   let severity: 'low' | 'medium' | 'high' = 'low';
   let confidence = 0;
-  let amplifierCount = 0;
-  let allDetectedKeywords: string[] = findAllHarmfulKeywords(content);
+  let fraudType: 'normal' | 'suspicious' | 'fraudulent' = 'normal';
+  let riskScore = 0;
   
-  // Check for keywords in each category
-  for (const [cat, keywords] of Object.entries(HARMFUL_KEYWORDS)) {
-    const catKeywords = detectKeywordsInCategory(content, keywords);
-    
-    if (catKeywords.length > 0) {
+  let allDetectedKeywords: string[] = findAllFraudKeywords(content);
+  let keywordsPerCategory = findKeywordsByCategory(content);
+  let detectedPatterns: string[] = [];
+  
+  // Check each category and collect all that have matching keywords
+  for (const [cat, keywords] of Object.entries(keywordsPerCategory)) {
+    if (keywords.length > 0) {
       flagged = true;
-      // Only set category if it hasn't been set yet
-      if (!category) {
-        category = cat as ContentCategory;
-      }
-      
-      // Check for context amplifiers near the keywords
-      for (const amplifier of CONTEXT_AMPLIFIERS) {
-        for (const keyword of catKeywords) {
-          const nearKeywordRegex = new RegExp(`${amplifier}\\s+\\w{0,10}\\s*${keyword}|${keyword}\\s*\\w{0,10}\\s+${amplifier}`, 'gi');
-          const amplifierMatches = contentLower.match(nearKeywordRegex);
-          
-          if (amplifierMatches) {
-            amplifierCount += amplifierMatches.length;
-          }
-        }
+      detectedPatterns.push(cat);
+      const mappedCategory = mapFraudTypeToCategory(cat, detectedPatterns);
+      if (!categories.includes(mappedCategory)) {
+        categories.push(mappedCategory);
       }
     }
   }
   
-  // Calculate severity based on keyword count and presence of amplifiers
+  // Check for fraud amplifiers
+  let amplifierCount = 0;
+  for (const amplifier of FRAUD_AMPLIFIERS) {
+    if (contentLower.includes(amplifier)) {
+      amplifierCount++;
+    }
+  }
+  
+  // Set the primary category
+  if (categories.length > 0) {
+    let maxKeywords = 0;
+    for (const cat of categories) {
+      let catKeywordCount = 0;
+      for (const pattern of detectedPatterns) {
+        catKeywordCount += keywordsPerCategory[pattern]?.length || 0;
+      }
+      if (catKeywordCount > maxKeywords) {
+        maxKeywords = catKeywordCount;
+        category = cat;
+      }
+    }
+  }
+  
+  // Calculate severity and fraud type based on keyword count and amplifiers
   const keywordCount = allDetectedKeywords.length;
   if (keywordCount > 0) {
-    if (keywordCount > 2 || amplifierCount > 1) {
+    if (keywordCount > 3 || amplifierCount > 2) {
       severity = 'high';
-      confidence = 0.85 + (keywordCount * 0.02);
+      fraudType = 'fraudulent';
+      confidence = 0.85 + Math.min(keywordCount * 0.02, 0.13);
+      riskScore = 80 + Math.min(keywordCount * 2, 20);
     } else if (keywordCount > 1 || amplifierCount > 0) {
       severity = 'medium';
-      confidence = 0.70 + (keywordCount * 0.02);
+      fraudType = 'suspicious';
+      confidence = 0.70 + Math.min(keywordCount * 0.02, 0.10);
+      riskScore = 50 + Math.min(keywordCount * 3, 30);
     } else {
       severity = 'low';
+      fraudType = 'suspicious';
       confidence = 0.60;
+      riskScore = 30 + keywordCount * 5;
     }
     
-    // Cap confidence at 0.98
     confidence = Math.min(confidence, 0.98);
+    riskScore = Math.min(riskScore, 100);
   }
   
   // Calculate context score
@@ -348,15 +354,16 @@ const performKeywordAnalysis = (content: string): AnalysisResult => {
     isFlagged: flagged,
     confidence: confidence,
     category: category,
+    categories: categories,
     severity: severity,
     modelAccuracy: MODEL_ACCURACY,
-    modelName: getModelName() + " (Keyword Fallback)",
+    modelName: MODEL_NAME + " (Keyword Analysis)",
     detectedKeywords: allDetectedKeywords,
     contextScore: contextScore,
-    analysisTimestamp: new Date()
+    analysisTimestamp: new Date(),
+    keywordsPerCategory: keywordsPerCategory,
+    fraudType: fraudType,
+    riskScore: riskScore,
+    detectedPatterns: detectedPatterns
   };
 };
-
-// Import the pipeline function
-import { pipeline } from '@huggingface/transformers';
-

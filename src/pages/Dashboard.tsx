@@ -1,470 +1,312 @@
+import { useEffect, useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { AlertCircle, CheckCircle, AlertTriangle, TrendingUp } from "lucide-react";
+import { getStats, getHistory, type AnalysisStats } from '@/lib/analysisHistory';
+import { Link } from 'react-router-dom';
+import ThreatMeter from '@/components/dashboard/ThreatMeter';
 
-import React, { useEffect } from 'react';
-import { 
-  Card, CardContent, CardDescription, CardHeader, CardTitle 
-} from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { generateMockStats } from '@/lib/mock-data';
-import { Badge } from '@/components/ui/badge';
-import { ArrowDown, ArrowUp, BarChart3, Clock, Shield } from 'lucide-react';
-import { 
-  AreaChart, Area, BarChart as RechartBarChart, Bar, XAxis, YAxis, 
-  CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, TooltipProps 
-} from 'recharts';
-import { useAppSelector } from '@/lib/redux/hooks';
-import { startTwitterPolling } from '@/lib/api/xApi';
+export default function Dashboard() {
+  const [stats, setStats] = useState<AnalysisStats | null>(null);
 
-const Dashboard = () => {
-  const stats = generateMockStats();
-  const moderationStats = useAppSelector(state => state.moderation.stats);
-  const posts = useAppSelector(state => state.moderation.posts);
-  
-  // Start Twitter polling when dashboard loads
   useEffect(() => {
-    startTwitterPolling();
+    loadStats();
+    
+    // Refresh stats every 5 seconds
+    const interval = setInterval(loadStats, 5000);
+    return () => clearInterval(interval);
   }, []);
-  
-  // Calculate category data from real posts
-  const categoryCountMap: Record<string, number> = {};
-  posts.forEach(post => {
-    if (post.category) {
-      categoryCountMap[post.category] = (categoryCountMap[post.category] || 0) + 1;
-    }
-  });
-  
-  const categoryData = Object.entries(categoryCountMap).map(([category, count]) => ({
-    name: category
-      .split('_')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' '),
-    value: count
-  }));
-  
-  // Calculate platform data from real posts
-  const platformCountMap: Record<string, number> = {};
-  posts.forEach(post => {
-    platformCountMap[post.platform] = (platformCountMap[post.platform] || 0) + 1;
-  });
-  
-  const platformData = Object.entries(platformCountMap).map(([platform, count]) => ({
-    name: platform.charAt(0).toUpperCase() + platform.slice(1),
-    value: count
-  }));
-  
-  // Calculate severity data from real posts
-  const severityCountMap: Record<string, number> = {};
-  posts.forEach(post => {
-    severityCountMap[post.severity] = (severityCountMap[post.severity] || 0) + 1;
-  });
-  
-  const severityData = Object.entries(severityCountMap).map(([severity, count]) => ({
-    name: severity.charAt(0).toUpperCase() + severity.slice(1),
-    value: count
-  }));
-  
-  // Format data for recharts: last 7 days of data
-  const today = new Date();
-  const dailyTrendData = Array.from({ length: 7 }, (_, i) => {
-    const date = new Date(today);
-    date.setDate(today.getDate() - (6 - i));
-    
-    // Count posts for this day
-    const dayStr = date.toISOString().split('T')[0];
-    const dayPosts = posts.filter(p => {
-      const postDate = new Date(p.timestamp);
-      return postDate.toISOString().split('T')[0] === dayStr;
-    });
-    
-    return {
-      name: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-      flagged: dayPosts.length,
-      resolved: dayPosts.filter(p => p.status === 'approved' || p.status === 'rejected').length
-    };
-  });
-  
-  // Colors for pie charts
-  const SEVERITY_COLORS = ['#33C3F0', '#F97316', '#ea384c'];
-  const CATEGORY_COLORS = ['#8b5cf6', '#7e69ab', '#6e59a5', '#3d328c', '#1A1F2C', '#9b87f5', '#b1a0ff', '#cbc2ff'];
-  const PLATFORM_COLORS = ['#1DA1F2', '#4267B2', '#E1306C'];
 
-  // Custom formatter for percentages to fix the TypeScript error
-  const percentFormatter = (value: number | string) => {
-    if (typeof value === 'number') {
-      return `${value.toFixed(1)}%`;
-    }
-    return `${value}%`;
+  const loadStats = () => {
+    setStats(getStats());
   };
 
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
+  if (!stats || stats.total === 0) {
+    return (
+      <div className="space-y-8 p-8">
+        <div>
+          <h1 className="text-4xl font-bold tracking-tight" style={{ 
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+            fontWeight: 800
+          }}>
+            Dashboard
+          </h1>
+          <p className="mt-2 text-lg" style={{ color: '#475569', fontWeight: 500 }}>
+            Fraud detection analytics and statistics
+          </p>
+        </div>
+
+        <Card className="border-2 shadow-2xl" style={{ 
+          background: 'rgba(255, 255, 255, 0.95)',
+          backdropFilter: 'blur(20px)',
+          borderColor: 'rgba(102, 126, 234, 0.3)'
+        }}>
+          <CardContent className="flex flex-col items-center justify-center py-16 text-center">
+            <div className="p-4 rounded-2xl mb-6" style={{
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              boxShadow: '0 8px 25px rgba(102, 126, 234, 0.4)'
+            }}>
+              <TrendingUp className="h-16 w-16 text-white" />
+            </div>
+            <h3 className="text-2xl font-bold mb-2" style={{ color: '#1e293b' }}>No Data Yet</h3>
+            <p className="mb-6 max-w-md text-lg" style={{ color: '#475569' }}>
+              Start analyzing content in the Fraud Detection page to see statistics and trends here.
+            </p>
+            <Link to="/moderation">
+              <Button className="text-white font-bold shadow-xl" style={{ 
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
+                boxShadow: '0 8px 25px rgba(102, 126, 234, 0.4)'
+              }}>
+                Go to Fraud Detection
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
       </div>
-      
-      <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
+    );
+  }
+
+  const riskDistributionData = [
+    { name: 'Normal', value: stats.normal, color: '#22c55e' },
+    { name: 'Suspicious', value: stats.suspicious, color: '#eab308' },
+    { name: 'Fraudulent', value: stats.fraudulent, color: '#ef4444' },
+  ];
+
+  const fraudTypeData = stats.fraudTypes.map(ft => ({
+    name: ft.type,
+    count: ft.count,
+  }));
+
+  const patternData = stats.commonPatterns.map(p => ({
+    name: p.pattern,
+    count: p.count,
+  }));
+
+  return (
+    <div className="space-y-8 p-8 slide-in-up">
+      <div>
+        <h1 className="text-4xl font-bold tracking-tight" style={{ 
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          backgroundClip: 'text',
+          fontWeight: 800,
+          textShadow: '0 2px 10px rgba(102, 126, 234, 0.3)'
+        }}>
+          Dashboard
+        </h1>
+        <p className="mt-2 text-lg" style={{ color: '#475569', fontWeight: 500 }}>
+          Real-time fraud detection analytics and statistics
+        </p>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <Card className="card-hover border-2 border-white/30 bg-white/95 backdrop-blur-xl shadow-xl">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Total Flagged Content
-            </CardTitle>
-            <Shield className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-semibold uppercase tracking-wide">Total Analyzed</CardTitle>
+            <div className="p-2 bg-primary/20 rounded-lg">
+              <TrendingUp className="h-5 w-5 text-primary" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{moderationStats.totalFlagged.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-3xl font-bold text-primary">{stats.total}</div>
+            <p className="text-xs text-muted-foreground mt-1">
               All time
             </p>
           </CardContent>
         </Card>
-        
-        <Card>
+
+        <Card className="card-hover border-2 border-white/30 bg-white/95 backdrop-blur-xl shadow-xl">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Pending Review
-            </CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-semibold uppercase tracking-wide">Normal Content</CardTitle>
+            <div className="p-2 bg-green-500/20 rounded-lg">
+              <CheckCircle className="h-5 w-5 text-green-600" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{moderationStats.pending.toLocaleString()}</div>
-            <div className="flex items-center gap-1 text-xs">
-              <Badge variant="outline" className="bg-alert-medium/10 text-alert-medium border-alert-medium/20">
-                <ArrowUp className="mr-1 h-3 w-3" />
-                +{Math.round(moderationStats.pending / (moderationStats.totalFlagged || 1) * 100)}% of total
-              </Badge>
-            </div>
+            <div className="text-3xl font-bold text-green-600">{stats.normal}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {((stats.normal / stats.total) * 100).toFixed(1)}% of total
+            </p>
           </CardContent>
         </Card>
-        
-        <Card>
+
+        <Card className="card-hover border-2 border-white/30 bg-white/95 backdrop-blur-xl shadow-xl">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Resolution Rate
-            </CardTitle>
-            <BarChart3 className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-semibold uppercase tracking-wide">Suspicious</CardTitle>
+            <div className="p-2 bg-yellow-500/20 rounded-lg">
+              <AlertTriangle className="h-5 w-5 text-yellow-600" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {Math.round((moderationStats.approved + moderationStats.rejected) / (moderationStats.totalFlagged || 1) * 100)}%
-            </div>
-            <div className="flex items-center gap-1 text-xs">
-              <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/20">
-                <ArrowUp className="mr-1 h-3 w-3" />
-                Updated in real-time
-              </Badge>
-            </div>
+            <div className="text-3xl font-bold text-yellow-600">{stats.suspicious}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {((stats.suspicious / stats.total) * 100).toFixed(1)}% of total
+            </p>
           </CardContent>
         </Card>
-        
-        <Card>
+
+        <Card className="card-hover border-2 border-white/30 bg-white/95 backdrop-blur-xl shadow-xl">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Approval Rate
-            </CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-semibold uppercase tracking-wide">Fraudulent</CardTitle>
+            <div className="p-2 bg-red-500/20 rounded-lg">
+              <AlertCircle className="h-5 w-5 text-red-600" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{Math.round(moderationStats.approvalRate * 100)}%</div>
-            <div className="flex items-center gap-1 text-xs">
-              <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/20">
-                <ArrowDown className="mr-1 h-3 w-3" />
-                Rejection: {Math.round(moderationStats.rejectionRate * 100)}%
-              </Badge>
+            <div className="text-3xl font-bold text-red-600">{stats.fraudulent}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {((stats.fraudulent / stats.total) * 100).toFixed(1)}% of total
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Threat Meter */}
+      <ThreatMeter />
+
+      {/* Charts */}
+      <div className="grid gap-6 md:grid-cols-2">
+        {/* Risk Distribution Pie Chart */}
+        <Card className="card-hover border-2 border-white/30 bg-white/95 backdrop-blur-xl shadow-xl">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-xl">
+              <span>📊</span>
+              Risk Distribution
+            </CardTitle>
+            <CardDescription className="text-base">
+              Breakdown of analyzed content by risk level
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={riskDistributionData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                  outerRadius={90}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {riskDistributionData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        {/* Average Risk Score */}
+        <Card className="card-hover border-2 border-white/30 bg-white/95 backdrop-blur-xl shadow-xl">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-xl">
+              <span>🎯</span>
+              Average Risk Score
+            </CardTitle>
+            <CardDescription className="text-base">
+              Overall risk assessment across all analyses
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex items-center justify-center">
+            <div className="text-center">
+              <div className={`text-7xl font-bold neon-glow ${
+                stats.averageRiskScore < 30 ? 'text-green-600' :
+                stats.averageRiskScore < 70 ? 'text-yellow-600' :
+                'text-red-600'
+              }`}>
+                {stats.averageRiskScore}
+              </div>
+              <div className="text-sm text-muted-foreground mt-2">out of 100</div>
+              <div className={`text-xl font-bold mt-4 px-4 py-2 rounded-lg ${
+                stats.averageRiskScore < 30 ? 'bg-green-500/20 text-green-700' :
+                stats.averageRiskScore < 70 ? 'bg-yellow-500/20 text-yellow-700' :
+                'bg-red-500/20 text-red-700'
+              }`}>
+                {stats.averageRiskScore < 30 ? '✅ Low Risk' :
+                 stats.averageRiskScore < 70 ? '⚠️ Medium Risk' :
+                 '🚨 High Risk'}
+              </div>
             </div>
           </CardContent>
         </Card>
       </div>
-      
-      <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="categories">Categories</TabsTrigger>
-          <TabsTrigger value="platforms">Platforms</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="overview" className="space-y-4">
-          <Card>
+
+      {/* Fraud Types and Patterns */}
+      <div className="grid gap-6 md:grid-cols-2">
+        {/* Fraud Types */}
+        {fraudTypeData.length > 0 && (
+          <Card className="card-hover border-2 border-white/30 bg-white/95 backdrop-blur-xl shadow-xl">
             <CardHeader>
-              <CardTitle>Daily Trends</CardTitle>
-              <CardDescription>
-                Flagged content vs resolved over time
+              <CardTitle className="flex items-center gap-2 text-xl">
+                <span>🚨</span>
+                Fraud Types Detected
+              </CardTitle>
+              <CardDescription className="text-base">
+                Most common types of fraud identified
               </CardDescription>
             </CardHeader>
-            <CardContent className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart
-                  data={dailyTrendData}
-                  margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-                >
-                  <defs>
-                    <linearGradient id="colorFlagged" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.8}/>
-                      <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0}/>
-                    </linearGradient>
-                    <linearGradient id="colorResolved" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#22c55e" stopOpacity={0.8}/>
-                      <stop offset="95%" stopColor="#22c55e" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <XAxis dataKey="name" stroke="#888888" fontSize={12} />
-                  <YAxis stroke="#888888" fontSize={12} />
-                  <CartesianGrid strokeDasharray="3 3" stroke="#333" opacity={0.1} />
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={fraudTypeData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} />
+                  <YAxis />
                   <Tooltip 
                     contentStyle={{ 
-                      backgroundColor: 'rgba(15, 23, 42, 0.9)', 
-                      border: '1px solid #3f4865',
-                      borderRadius: '6px',
-                      color: '#fff' 
+                      backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+                      border: '2px solid #ef4444',
+                      borderRadius: '8px'
                     }}
                   />
-                  <Area 
-                    type="monotone" 
-                    dataKey="flagged" 
-                    stroke="#8b5cf6" 
-                    fillOpacity={1} 
-                    fill="url(#colorFlagged)" 
-                    name="Flagged"
-                  />
-                  <Area 
-                    type="monotone" 
-                    dataKey="resolved" 
-                    stroke="#22c55e" 
-                    fillOpacity={1} 
-                    fill="url(#colorResolved)" 
-                    name="Resolved"
-                  />
-                </AreaChart>
+                  <Bar dataKey="count" fill="#ef4444" radius={[8, 8, 0, 0]} />
+                </BarChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>By Severity</CardTitle>
-              </CardHeader>
-              <CardContent className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={severityData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={80}
-                      fill="#8884d8"
-                      paddingAngle={5}
-                      dataKey="value"
-                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                      labelLine={false}
-                    >
-                      {severityData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={SEVERITY_COLORS[index % SEVERITY_COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: 'rgba(15, 23, 42, 0.9)', 
-                        border: '1px solid #3f4865',
-                        borderRadius: '6px',
-                        color: '#fff' 
-                      }}
-                      formatter={(value) => [value, 'Count']}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-            
-            <Card className="col-span-2">
-              <CardHeader>
-                <CardTitle>Moderation Metrics</CardTitle>
-              </CardHeader>
-              <CardContent className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <RechartBarChart
-                    data={[
-                      { name: 'Approval Rate', value: moderationStats.approvalRate * 100 },
-                      { name: 'Rejection Rate', value: moderationStats.rejectionRate * 100 },
-                    ]}
-                    margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" stroke="#333" opacity={0.1} />
-                    <XAxis dataKey="name" stroke="#888888" />
-                    <YAxis stroke="#888888" />
-                    <Tooltip 
-                      formatter={(value) => {
-                        return typeof value === 'number' ? [`${value.toFixed(1)}%`, 'Rate'] : [`${value}%`, 'Rate'];
-                      }}
-                      contentStyle={{ 
-                        backgroundColor: 'rgba(15, 23, 42, 0.9)', 
-                        border: '1px solid #3f4865',
-                        borderRadius: '6px',
-                        color: '#fff' 
-                      }}
-                    />
-                    <Bar 
-                      dataKey="value" 
-                      fill="#8b5cf6" 
-                      radius={[4, 4, 0, 0]} 
-                      label={{ position: 'top', fill: '#888', fontSize: 12 }}
-                    />
-                  </RechartBarChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="categories" className="space-y-4">
-          <Card>
+        )}
+
+        {/* Common Patterns */}
+        {patternData.length > 0 && (
+          <Card className="card-hover border-2 border-white/30 bg-white/95 backdrop-blur-xl shadow-xl">
             <CardHeader>
-              <CardTitle>Content Categories</CardTitle>
-              <CardDescription>
-                Distribution of flagged content by category
+              <CardTitle className="flex items-center gap-2 text-xl">
+                <span>🔍</span>
+                Common Patterns
+              </CardTitle>
+              <CardDescription className="text-base">
+                Most frequently detected fraud patterns
               </CardDescription>
             </CardHeader>
-            <CardContent className="h-96">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 h-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={categoryData}
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="value"
-                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                    >
-                      {categoryData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={CATEGORY_COLORS[index % CATEGORY_COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: 'rgba(15, 23, 42, 0.9)', 
-                        border: '1px solid #3f4865',
-                        borderRadius: '6px',
-                        color: '#fff' 
-                      }}
-                      formatter={(value) => [value, 'Count']}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-                
-                <ResponsiveContainer width="100%" height="100%">
-                  <RechartBarChart
-                    data={categoryData}
-                    layout="vertical"
-                    margin={{ top: 5, right: 30, left: 100, bottom: 5 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" stroke="#333" opacity={0.1} />
-                    <XAxis type="number" stroke="#888888" />
-                    <YAxis 
-                      dataKey="name" 
-                      type="category" 
-                      stroke="#888888" 
-                      width={90}
-                      tick={{ fontSize: 12 }}
-                    />
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: 'rgba(15, 23, 42, 0.9)', 
-                        border: '1px solid #3f4865',
-                        borderRadius: '6px',
-                        color: '#fff' 
-                      }}
-                      formatter={(value) => [value, 'Count']}
-                    />
-                    <Bar 
-                      dataKey="value" 
-                      fill="#8b5cf6" 
-                      radius={[0, 4, 4, 0]} 
-                    >
-                      {categoryData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={CATEGORY_COLORS[index % CATEGORY_COLORS.length]} />
-                      ))}
-                    </Bar>
-                  </RechartBarChart>
-                </ResponsiveContainer>
-              </div>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={patternData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} />
+                  <YAxis />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+                      border: '2px solid #3b82f6',
+                      borderRadius: '8px'
+                    }}
+                  />
+                  <Bar dataKey="count" fill="#3b82f6" radius={[8, 8, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
             </CardContent>
           </Card>
-        </TabsContent>
-        
-        <TabsContent value="platforms" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Platform Breakdown</CardTitle>
-              <CardDescription>
-                Distribution of flagged content by platform
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="h-96">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 h-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={platformData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={80}
-                      fill="#8884d8"
-                      paddingAngle={5}
-                      dataKey="value"
-                      label
-                    >
-                      {platformData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={PLATFORM_COLORS[index % PLATFORM_COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: 'rgba(15, 23, 42, 0.9)', 
-                        border: '1px solid #3f4865',
-                        borderRadius: '6px',
-                        color: '#fff' 
-                      }}
-                      formatter={(value) => [value, 'Count']}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-                
-                <ResponsiveContainer width="100%" height="100%">
-                  <RechartBarChart
-                    data={platformData}
-                    margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" stroke="#333" opacity={0.1} />
-                    <XAxis dataKey="name" stroke="#888888" />
-                    <YAxis stroke="#888888" />
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: 'rgba(15, 23, 42, 0.9)', 
-                        border: '1px solid #3f4865',
-                        borderRadius: '6px',
-                        color: '#fff' 
-                      }}
-                      formatter={(value) => [value, 'Count']}
-                    />
-                    <Bar 
-                      dataKey="value" 
-                      radius={[4, 4, 0, 0]} 
-                    >
-                      {platformData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={PLATFORM_COLORS[index % PLATFORM_COLORS.length]} />
-                      ))}
-                    </Bar>
-                  </RechartBarChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+        )}
+      </div>
     </div>
   );
-};
-
-export default Dashboard;
+}

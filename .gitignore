@@ -22,3 +22,23 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+
+# Machine Learning Models (too large for GitHub)
+*.pkl
+*.h5
+*.model
+*.weights
+backend/fraud_detection_classifier/
+backend/harmful_content_classifier/
+backend/bert_fraud_classifier/

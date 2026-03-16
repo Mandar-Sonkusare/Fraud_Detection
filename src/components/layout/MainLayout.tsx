@@ -25,16 +25,25 @@ interface NavItemProps {
 const NavItem = ({ to, icon, label, active, alert }: NavItemProps) => (
   <Link to={to}>
     <div
-      className={`flex items-center px-3 py-2 my-1 rounded-md text-sm font-medium group transition-colors ${
-        active
-          ? "bg-accent text-accent-foreground"
-          : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-      }`}
+      className="flex items-center px-4 py-3 my-1 rounded-xl text-sm font-medium group transition-all duration-300 relative"
+      style={active ? {
+        background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(240, 147, 251, 0.15) 100%)',
+        borderLeft: '4px solid #667eea',
+        paddingLeft: '12px',
+        color: '#667eea',
+        fontWeight: 600,
+        boxShadow: '0 4px 15px rgba(102, 126, 234, 0.2)'
+      } : {
+        color: '#64748b'
+      }}
     >
-      <div className="mr-3 h-5 w-5">{icon}</div>
-      <span>{label}</span>
+      <div className="mr-4 h-5 w-5">{icon}</div>
+      <span className="flex-1">{label}</span>
       {alert !== undefined && alert > 0 && (
-        <Badge className="ml-auto bg-alert-high text-white">
+        <Badge className="ml-auto rounded-full px-2 py-1 text-xs text-white font-bold" style={{
+          background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+          boxShadow: '0 4px 10px rgba(240, 147, 251, 0.5)'
+        }}>
           {alert}
         </Badge>
       )}
@@ -54,20 +63,47 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   const alertCount = 5;
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col relative" style={{
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #00f2fe 100%)',
+      backgroundSize: '400% 400%',
+      animation: 'gradient-flow 15s ease infinite'
+    }}>
       {/* Top navbar */}
-      <header className="border-b border-border bg-background/95 backdrop-blur h-14 flex items-center px-6 sticky top-0 z-30">
-        <div className="flex items-center gap-2 font-bold text-lg text-primary">
-          <Shield className="h-5 w-5 text-accent" />
-          <span>Social Sentinel AI</span>
+      <header className="border-b h-16 flex items-center px-8 sticky top-0 z-30" style={{
+        background: 'rgba(255, 255, 255, 0.95)',
+        backdropFilter: 'blur(20px)',
+        borderColor: 'rgba(102, 126, 234, 0.2)',
+        boxShadow: '0 4px 20px rgba(102, 126, 234, 0.15)'
+      }}>
+        <div className="flex items-center gap-3 font-bold text-xl">
+          <div className="p-2 rounded-xl" style={{
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)'
+          }}>
+            <Shield className="h-6 w-6 text-white" />
+          </div>
+          <span style={{
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text'
+          }}>
+            Social Sentinel AI
+          </span>
         </div>
         
-        <div className="ml-auto flex items-center gap-4">
-          <Button variant="ghost" size="icon" className="relative">
+        <div className="ml-auto flex items-center gap-6">
+          <Button variant="ghost" size="icon" className="relative rounded-xl" style={{
+            color: '#667eea'
+          }}>
             <Bell className="h-5 w-5" />
             {alertCount > 0 && (
               <Badge 
-                className="absolute -top-1 -right-1 px-1.5 h-5 min-w-5 flex items-center justify-center bg-alert-high text-white"
+                className="absolute -top-1 -right-1 px-1.5 h-5 min-w-5 flex items-center justify-center rounded-full text-xs text-white"
+                style={{
+                  background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                  boxShadow: '0 4px 10px rgba(240, 147, 251, 0.5)'
+                }}
               >
                 {alertCount}
               </Badge>
@@ -76,12 +112,15 @@ const MainLayout = ({ children }: MainLayoutProps) => {
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-full bg-accent/20 flex items-center justify-center text-accent font-medium">
+              <Button variant="ghost" className="flex items-center gap-3 rounded-xl px-4 py-2" style={{ color: '#475569' }}>
+                <div className="h-9 w-9 rounded-xl flex items-center justify-center text-white font-semibold" style={{
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  boxShadow: '0 4px 10px rgba(102, 126, 234, 0.3)'
+                }}>
                   AM
                 </div>
-                <span>Admin</span>
-                <ChevronDown className="h-4 w-4 opacity-50" />
+                <span className="font-medium">Admin</span>
+                <ChevronDown className="h-4 w-4 opacity-60" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
@@ -106,18 +145,22 @@ const MainLayout = ({ children }: MainLayoutProps) => {
       
       <div className="flex flex-1">
         {/* Sidebar */}
-        <aside className="w-64 bg-sidebar flex flex-col border-r border-border">
-          <div className="p-4">
-            <div className="px-3 py-2">
-              <h2 className="text-xs font-semibold text-muted-foreground mb-3 uppercase tracking-wider">
-                Monitoring
+        <aside className="w-72 flex flex-col" style={{
+          background: 'rgba(255, 255, 255, 0.9)',
+          backdropFilter: 'blur(20px)',
+          borderRight: '1px solid rgba(102, 126, 234, 0.2)'
+        }}>
+          <div className="p-6">
+            <div className="px-4 py-3">
+              <h2 className="text-xs font-semibold mb-4 uppercase tracking-wider" style={{ color: '#667eea' }}>
+                Fraud Detection
               </h2>
               <nav className="space-y-1">
                 <NavItem 
-                  to="/" 
-                  icon={<Home className="h-5 w-5" />} 
-                  label="Overview" 
-                  active={currentPath === "/"} 
+                  to="/moderation" 
+                  icon={<Shield className="h-5 w-5" />} 
+                  label="Fraud Detection" 
+                  active={currentPath === "/moderation"}
                 />
                 <NavItem 
                   to="/dashboard" 
@@ -125,20 +168,13 @@ const MainLayout = ({ children }: MainLayoutProps) => {
                   label="Dashboard" 
                   active={currentPath === "/dashboard"} 
                 />
-                <NavItem 
-                  to="/moderation" 
-                  icon={<MessageSquare className="h-5 w-5" />} 
-                  label="Moderation Queue" 
-                  active={currentPath === "/moderation"}
-                  alert={13}
-                />
               </nav>
             </div>
             
-            <Separator className="my-4 bg-border/50" />
+            <Separator className="my-6" style={{ background: 'rgba(102, 126, 234, 0.2)' }} />
             
-            <div className="px-3 py-2">
-              <h2 className="text-xs font-semibold text-muted-foreground mb-3 uppercase tracking-wider">
+            <div className="px-4 py-3">
+              <h2 className="text-xs font-semibold mb-4 uppercase tracking-wider" style={{ color: '#667eea' }}>
                 Configuration
               </h2>
               <nav className="space-y-1">
@@ -155,7 +191,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
         
         {/* Main content */}
         <main className="flex-1 overflow-auto">
-          <div className="container px-6 py-6 max-w-full">
+          <div className="container px-8 py-8 max-w-full">
             {children}
           </div>
         </main>
