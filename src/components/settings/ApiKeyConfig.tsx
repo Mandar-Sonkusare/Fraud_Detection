@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { getXApiCredentials, setXApiCredentials } from "@/lib/api/xApi";
+import { Key, Eye, EyeOff, Save, Zap } from "lucide-react";
 
 const ApiKeyConfig = () => {
   const [apiKey, setApiKey] = useState('');
@@ -12,9 +13,9 @@ const ApiKeyConfig = () => {
   const [accessToken, setAccessToken] = useState('');
   const [accessTokenSecret, setAccessTokenSecret] = useState('');
   const [bearerToken, setBearerToken] = useState('');
+  const [showKeys, setShowKeys] = useState(false);
   
   useEffect(() => {
-    // Get saved API credentials on component mount
     const savedCreds = getXApiCredentials();
     if (savedCreds) {
       setApiKey(savedCreds.apiKey || '');
@@ -54,95 +55,86 @@ const ApiKeyConfig = () => {
     setAccessTokenSecret('WOV2CWeYmoV8cCjPwbWjDKo1hc2ftvAyVSGO1sG2f6WoT');
     setBearerToken('AAAAAAAAAAAAAAAAAAAAABFQ0QEAAAAAk8983Y%2BXAi8lOEkK2jb9To%2BgB%2Fg%3D8opTsFwfptdswcyxSFoyxvTHeoW1Oofo9IRWGxsGFlzMorMvF4');
   };
+
+  const fields = [
+    { label: 'X API Key', value: apiKey, setter: setApiKey, placeholder: 'Enter your X API key', required: true },
+    { label: 'X API Key Secret', value: apiKeySecret, setter: setApiKeySecret, placeholder: 'Enter your X API key secret' },
+    { label: 'X Access Token', value: accessToken, setter: setAccessToken, placeholder: 'Enter your X access token' },
+    { label: 'X Access Token Secret', value: accessTokenSecret, setter: setAccessTokenSecret, placeholder: 'Enter your X access token secret' },
+    { label: 'X Bearer Token', value: bearerToken, setter: setBearerToken, placeholder: 'Enter your X bearer token', required: true },
+  ];
   
   return (
-    <Card className="backdrop-blur-sm bg-card/80 border-border">
+    <Card className="glass-card">
       <CardHeader>
-        <CardTitle>X API Configuration</CardTitle>
-        <CardDescription>
+        <CardTitle className="flex items-center gap-3 text-xl text-white">
+          <div 
+            className="p-2 rounded-lg"
+            style={{ background: 'rgba(72, 219, 251, 0.2)' }}
+          >
+            <Key className="h-5 w-5 text-neon-cyan" />
+          </div>
+          <span style={{ fontFamily: 'Space Grotesk, sans-serif' }}>X API Configuration</span>
+        </CardTitle>
+        <CardDescription className="text-base text-gray-400">
           Enter your X API credentials to fetch real-time data
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          <div>
-            <label className="text-sm font-medium mb-1 block">
-              X API Key
-            </label>
-            <div className="flex gap-2 mb-3">
-              <Input
-                type="password"
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-                placeholder="Enter your X API key"
-                className="bg-background/40 border-border"
-              />
-            </div>
-
-            <label className="text-sm font-medium mb-1 block">
-              X API Key Secret
-            </label>
-            <div className="flex gap-2 mb-3">
-              <Input
-                type="password"
-                value={apiKeySecret}
-                onChange={(e) => setApiKeySecret(e.target.value)}
-                placeholder="Enter your X API key secret"
-                className="bg-background/40 border-border"
-              />
-            </div>
-
-            <label className="text-sm font-medium mb-1 block">
-              X Access Token
-            </label>
-            <div className="flex gap-2 mb-3">
-              <Input
-                type="password"
-                value={accessToken}
-                onChange={(e) => setAccessToken(e.target.value)}
-                placeholder="Enter your X access token"
-                className="bg-background/40 border-border"
-              />
-            </div>
-
-            <label className="text-sm font-medium mb-1 block">
-              X Access Token Secret
-            </label>
-            <div className="flex gap-2 mb-3">
-              <Input
-                type="password"
-                value={accessTokenSecret}
-                onChange={(e) => setAccessTokenSecret(e.target.value)}
-                placeholder="Enter your X access token secret"
-                className="bg-background/40 border-border"
-              />
-            </div>
-
-            <label className="text-sm font-medium mb-1 block">
-              X Bearer Token
-            </label>
-            <div className="flex gap-2 mb-3">
-              <Input
-                type="password"
-                value={bearerToken}
-                onChange={(e) => setBearerToken(e.target.value)}
-                placeholder="Enter your X bearer token"
-                className="bg-background/40 border-border"
-              />
-            </div>
-
-            <div className="flex justify-between mt-4">
-              <Button onClick={handlePreFill} variant="outline">
-                Pre-fill Keys
-              </Button>
-              <Button onClick={handleSaveApiKeys}>
-                Save Keys
-              </Button>
-            </div>
-            <p className="text-xs text-muted-foreground mt-2">
-              The API credentials will be stored in your browser's local storage
-            </p>
+        <div className="space-y-5 max-w-2xl">
+          {/* Toggle visibility */}
+          <div className="flex justify-end">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowKeys(!showKeys)}
+              className="text-gray-400 hover:text-white hover:bg-white/10 gap-2"
+            >
+              {showKeys ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              {showKeys ? 'Hide Keys' : 'Show Keys'}
+            </Button>
           </div>
+
+          {fields.map((field, idx) => (
+            <div key={idx} className="space-y-2">
+              <label className="text-sm font-semibold text-neon-cyan flex items-center gap-2">
+                {field.label}
+                {field.required && (
+                  <span className="text-xs text-neon-red/70 font-normal">Required</span>
+                )}
+              </label>
+              <Input
+                type={showKeys ? 'text' : 'password'}
+                value={field.value}
+                onChange={(e) => field.setter(e.target.value)}
+                placeholder={field.placeholder}
+                className="bg-white/5 border-2 border-white/10 text-white placeholder:text-gray-500 focus:border-neon-cyan focus:ring-2 focus:ring-neon-cyan/20 rounded-xl h-12"
+              />
+            </div>
+          ))}
+
+          <div className="flex justify-between mt-6 pt-4 border-t border-white/10">
+            <Button 
+              onClick={handlePreFill} 
+              variant="outline"
+              className="rounded-xl font-semibold transition-all hover:scale-105 bg-neon-purple/10 border-2 border-neon-purple/30 text-neon-purple hover:bg-neon-purple/20 hover:border-neon-purple/50 gap-2"
+            >
+              <Zap className="h-4 w-4" />
+              Pre-fill Keys
+            </Button>
+            <button 
+              onClick={handleSaveApiKeys}
+              className="neon-button flex items-center gap-2"
+            >
+              <Save className="h-4 w-4" />
+              Save Keys
+            </button>
+          </div>
+          
+          <p className="text-xs text-gray-500 mt-2 flex items-center gap-1">
+            🔒 Credentials are stored securely in your browser's local storage
+          </p>
         </div>
       </CardContent>
     </Card>
