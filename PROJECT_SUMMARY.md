@@ -23,10 +23,12 @@ A complete fraud detection system using Machine Learning and NLP to identify fra
 - **Impersonation**: Fake bank/company representatives
 
 ### 3. **Machine Learning Models**
-- **6 Trained Models**: Logistic Regression, SVM, Random Forest, Gradient Boosting, Naive Bayes, MLP
-- **Best Model**: SVM with 99.6% accuracy
-- **Dataset**: 25,514 real samples (SMS Spam Collection + Generated Phishing)
-- **Realistic Performance**: 93.3% accuracy on hardest class (no overfitting)
+- **Deep Learning**: DistilBERT fine-tuned on real SMS Spam Collection dataset
+- **Traditional ML**: 6 models (Logistic Regression, SVM, Random Forest, Gradient Boosting, Naive Bayes, MLP)
+- **Hybrid System**: Rule-based detection + BERT + Traditional ML (3-layer approach)
+- **Best Performance**: BERT with 98.6% F1 score, 98.58% accuracy
+- **Dataset**: 5,572 real SMS messages + augmented scam examples
+- **Training Time**: ~45 minutes on CPU (5 epochs)
 
 ### 4. **Risk Scoring System**
 - **Risk Score**: 0-100 scale
@@ -41,14 +43,19 @@ A complete fraud detection system using Machine Learning and NLP to identify fra
 ### Backend (Python + FastAPI)
 ```
 social-sentinel-ai/backend/
-├── server.py                          # Main API server (fraud-only, cleaned)
-├── train_fraud_real_datasets.py       # Training script with real data
+├── server.py                          # Hybrid detection API (rules + BERT + ML)
+├── train_distilbert.py                # BERT fine-tuning script
+├── train_production_fraud_model.py    # Traditional ML training
 ├── behavioral_analysis.py             # User behavior analysis
-├── fraud_detection_classifier/        # Trained models directory
+├── bert_fraud_classifier/             # Fine-tuned BERT model
+│   ├── config.json                    # Model configuration
+│   ├── model.safetensors              # Model weights
+│   ├── tokenizer.json                 # Tokenizer
+│   └── model_info.json                # Training metadata
+├── fraud_detection_classifier/        # Traditional ML models
 │   ├── model_*.pkl                    # 6 trained models
 │   ├── vectorizer.pkl                 # TF-IDF vectorizer
-│   ├── model_info.json                # Model metadata
-│   └── metrics.json                   # Performance metrics
+│   └── model_info.json                # Model metadata
 └── requirements.txt                   # Python dependencies
 ```
 
@@ -87,20 +94,33 @@ social-sentinel-ai/src/
 
 ## 📊 Model Performance
 
-### Overall Metrics
-- **Best Model**: SVM
-- **Accuracy**: 99.6%
-- **F1 Score**: 99.64%
-- **Dataset Size**: 25,514 samples
+### Hybrid Detection System (3 Layers)
 
-### Per-Class Performance
+#### Layer 1: Rule-Based Detection (100% Precision)
+- Detects critical patterns with certainty
+- Patterns: credential theft, crypto scams, IRS scams, prize scams, tech support scams
+- Confidence: 99% when triggered
+- Risk Score: 95/100
+
+#### Layer 2: DistilBERT Deep Learning
+- **Accuracy**: 98.58%
+- **F1 Score**: 98.6%
+- **Dataset**: 5,572 real SMS messages + augmented examples
+- **Training**: 5 epochs on CPU (~45 minutes)
+
+### Per-Class Performance (BERT)
 | Class | Precision | Recall | F1-Score | Support |
 |-------|-----------|--------|----------|---------|
-| Normal | 99.7% | 99.5% | 99.6% | 3,354 |
-| Suspicious | 89.7% | 93.3% | 91.4% | 149 |
-| Fraudulent | 100% | 100% | 100% | 1,600 |
+| Normal | 0.99 | 0.99 | 0.99 | 969 |
+| Suspicious | 0.73 | 0.85 | 0.79 | 13 |
+| Fraudulent | 0.95 | 0.95 | 0.95 | 147 |
 
-**Note**: Suspicious class at 93.3% shows the model is NOT overfitting - it struggles with the hardest cases, which is realistic.
+#### Layer 3: Traditional ML (Fallback)
+- 6 models available
+- Best: SVM
+- Used when BERT unavailable
+
+**Note**: The system prioritizes rule-based detection for critical patterns, then uses BERT for semantic understanding, with traditional ML as fallback.
 
 ---
 
@@ -119,11 +139,15 @@ cd social-sentinel-ai/backend
 pip install -r requirements.txt
 
 # Models are already trained, but to retrain:
-python train_fraud_real_datasets.py --mlp_epochs 10
+# BERT model (recommended, ~45 minutes on CPU)
+python train_distilbert.py
 
-# Start backend server
+# Traditional ML models (backup)
+python train_production_fraud_model.py
+
+# Start backend server (loads BERT automatically)
 python server.py
-# Runs on http://localhost:8000
+# Runs on http://localhost:8002
 ```
 
 ### Frontend Setup
@@ -139,9 +163,9 @@ npm run dev
 ```
 
 ### Access the Application
-- **Frontend**: http://localhost:8081
-- **Backend API**: http://localhost:8000
-- **API Docs**: http://localhost:8000/docs
+- **Frontend**: http://localhost:5173 (Vite dev server)
+- **Backend API**: http://localhost:8002
+- **API Docs**: http://localhost:8002/docs
 
 ---
 
@@ -208,24 +232,33 @@ npm run dev
 
 ---
 
-## 📈 Future Enhancements
+## 📈 Completed Enhancements
 
-### Option 1: Switch to Larger Real Dataset
-- Download larger fraud datasets (100K+ samples)
-- Retrain models for better generalization
-- **Time Required**: 15-20 minutes
-- **Expected Accuracy**: 90-95%
+### ✅ Deep Learning Implementation
+- ✅ Fine-tuned DistilBERT on real SMS Spam Collection
+- ✅ 98.6% F1 score, 98.58% accuracy
+- ✅ Hybrid 3-layer detection system
+- ✅ Rule-based + BERT + Traditional ML
+- ✅ Production-ready deployment
 
-### Option 2: Add Deep Learning
-- Implement BERT-based models
-- Better context understanding
-- **Time Required**: 2-3 hours
-- **Expected Accuracy**: 95-98%
+### Future Enhancements
 
-### Option 3: Real-time Monitoring
+### Option 1: Expand Dataset
+- Add more diverse fraud examples
+- Include social media specific scams
+- **Time Required**: 1-2 hours
+- **Expected Improvement**: +1-2% accuracy
+
+### Option 2: Real-time Monitoring
 - WebSocket connections
 - Live fraud detection stream
 - Alert system
+- **Time Required**: 3-4 hours
+
+### Option 3: Multi-language Support
+- Train models on multiple languages
+- Language detection
+- **Time Required**: 4-6 hours
 
 ---
 

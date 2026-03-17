@@ -1,118 +1,106 @@
 [
   {
-    "timestamp": "2026-03-16T21:12:31.970777",
-    "text": "Fr e e g i f t f o r y o u!!! click-here-now",
+    "timestamp": "2026-03-17T01:11:53.798784",
+    "text": "Exclusive offer just for you! Buy now and get 50% discount. Offer expires in 24 hours!",
     "prediction": "fraudulent",
-    "confidence": 0.95,
-    "risk_score": 100.0,
-    "detected_patterns": [
-      "voucher_scam"
-    ],
-    "fraud_type": "phishing",
-    "user_info": {}
-  },
-  {
-    "timestamp": "2026-03-16T21:12:31.975990",
-    "text": "c0ngr@tulati0ns! You have w0n a fr33 pr1ze. Cl1ck the l1nk bel0w to cla1m it before it exp1res.",
-    "prediction": "fraudulent",
-    "confidence": 0.95,
-    "risk_score": 100.0,
-    "detected_patterns": [
-      "voucher_scam"
-    ],
-    "fraud_type": "phishing",
-    "user_info": {}
-  },
-  {
-    "timestamp": "2026-03-16T21:12:44.384201",
-    "text": "madam pls redeem this play store voucher to avail 400 $ directly into your google account https://sm.in",
-    "prediction": "fraudulent",
-    "confidence": 0.5823706738701964,
-    "risk_score": 100.0,
-    "detected_patterns": [
-      "shortened_url",
-      "money_amount",
-      "large_amount"
-    ],
-    "fraud_type": "phishing",
-    "user_info": {}
-  },
-  {
-    "timestamp": "2026-03-16T21:12:44.394286",
-    "text": "pls give your social security number for the safety of your account",
-    "prediction": "fraudulent",
-    "confidence": 0.4599351249599776,
-    "risk_score": 83.79805374879933,
+    "confidence": 0.9998363256454468,
+    "risk_score": 99.9950897693634,
     "detected_patterns": [],
     "fraud_type": "phishing",
-    "user_info": {}
+    "model_used": "bert"
   },
   {
-    "timestamp": "2026-03-16T21:12:44.399448",
-    "text": "Fr e e g i f t f o r y o u!!! click-here-now",
-    "prediction": "fraudulent",
-    "confidence": 0.95,
-    "risk_score": 100.0,
+    "timestamp": "2026-03-17T01:12:37.390790",
+    "text": "\ud83d\udd25 MEGA BLOWOUT SALE \ud83d\udd25 Everything 90% OFF! Only 3 hours left! Shop now or regret forever! Luxury watches, designer bags, electronics - ALL MUST GO! Don't miss this once-in-a-lifetime opportunity!\n",
+    "prediction": "suspicious",
+    "confidence": 0.9998534917831421,
+    "risk_score": 99.99560475349426,
     "detected_patterns": [
-      "voucher_scam"
+      "aggressive_marketing"
     ],
-    "fraud_type": "phishing",
-    "user_info": {}
+    "fraud_type": "spam",
+    "model_used": "bert"
   },
   {
-    "timestamp": "2026-03-16T21:12:44.405015",
-    "text": "c0ngr@tulati0ns! You have w0n a fr33 pr1ze",
+    "timestamp": "2026-03-17T01:14:00.559283",
+    "text": "MEGA BLOWOUT SALE! 95% OFF EVERYTHING! Only 2 hours left! Stock running out FAST! Order NOW before it's gone forever! FREE SHIPPING!\n",
+    "prediction": "suspicious",
+    "confidence": 0.9997861981391907,
+    "risk_score": 99.99358594417572,
+    "detected_patterns": [
+      "aggressive_marketing"
+    ],
+    "fraud_type": "spam",
+    "model_used": "bert"
+  },
+  {
+    "timestamp": "2026-03-17T01:14:17.876729",
+    "text": "Reminder: Your dentist appointment with Dr. Johnson is tomorrow at 3:00 PM. Please arrive 10 minutes early. Call 555-0123 to reschedule if needed.\n",
     "prediction": "normal",
-    "confidence": 0.638189889223968,
-    "risk_score": 19.14569667671904,
+    "confidence": 0.9961894154548645,
+    "risk_score": 0.11431753635406494,
     "detected_patterns": [],
     "fraud_type": "legitimate",
-    "user_info": {}
+    "model_used": "bert"
   },
   {
-    "timestamp": "2026-03-16T21:12:44.410196",
-    "text": "Your order #12345 has been confirmed",
+    "timestamp": "2026-03-17T01:15:08.327584",
+    "text": "pls scann the QR code and s3nd a paymen7 of 78900 ",
     "prediction": "normal",
-    "confidence": 0.47971610053058134,
-    "risk_score": 14.39148301591744,
+    "confidence": 0.9990309476852417,
+    "risk_score": 0.029071569442749023,
     "detected_patterns": [],
     "fraud_type": "legitimate",
-    "user_info": {}
+    "model_used": "bert"
   },
   {
-    "timestamp": "2026-03-16T21:12:52.246491",
-    "text": "c0ngr@tulati0ns! You have w0n a fr33 pr1ze. Cl1ck the l1nk bel0w to cla1m it before it exp1res.",
+    "timestamp": "2026-03-17T01:16:29.645762",
+    "text": "pls scann the QR code and s3nd a paymen7 of 78900 and expect a paymen7 off 2789000 in your bank account by evening thx..",
     "prediction": "fraudulent",
-    "confidence": 0.95,
-    "risk_score": 100.0,
-    "detected_patterns": [
-      "voucher_scam"
-    ],
+    "confidence": 0.5252723097801208,
+    "risk_score": 85.75816929340363,
+    "detected_patterns": [],
     "fraud_type": "phishing",
-    "user_info": {}
+    "model_used": "bert"
   },
   {
-    "timestamp": "2026-03-16T21:13:01.038490",
-    "text": "c0ngr@tulati0ns! You have w0n a fr33 pr1ze. Cl1ck the l1nk bel0w to cla1m it before it exp1res.",
-    "prediction": "fraudulent",
-    "confidence": 0.95,
-    "risk_score": 100.0,
-    "detected_patterns": [
-      "voucher_scam"
-    ],
-    "fraud_type": "phishing",
-    "user_info": {}
+    "timestamp": "2026-03-17T01:16:42.646928",
+    "text": "pls scann the QR code and s3nd a paymen7 of 78900 ",
+    "prediction": "normal",
+    "confidence": 0.9990309476852417,
+    "risk_score": 0.029071569442749023,
+    "detected_patterns": [],
+    "fraud_type": "legitimate",
+    "model_used": "bert"
   },
   {
-    "timestamp": "2026-03-16T21:13:19.899094",
-    "text": "c0ngr@tulati0ns! You\u2019ve w0n a fr33 pr1ze. Cl1ck the l1nk bel0w to cla1m it bef0re it exp1res.",
+    "timestamp": "2026-03-17T13:14:54.213899",
+    "text": "Congratulations! You've been selected to receive a $500 Amazon gift card. Claim now: tinyurl.com/claim-prize",
     "prediction": "fraudulent",
-    "confidence": 0.95,
-    "risk_score": 100.0,
-    "detected_patterns": [
-      "voucher_scam"
-    ],
+    "confidence": 0.9908238649368286,
+    "risk_score": 99.72471594810486,
+    "detected_patterns": [],
     "fraud_type": "phishing",
-    "user_info": {}
+    "model_used": "bert"
+  },
+  {
+    "timestamp": "2026-03-17T13:15:07.875456",
+    "text": "Reminder: Your dentist appointment with Dr. Johnson is tomorrow at 3:00 PM. Please arrive 10 minutes early. Call 555-0123 to reschedule if needed.\n",
+    "prediction": "normal",
+    "confidence": 0.9961894154548645,
+    "risk_score": 0.11431753635406494,
+    "detected_patterns": [],
+    "fraud_type": "legitimate",
+    "model_used": "bert"
+  },
+  {
+    "timestamp": "2026-03-17T13:15:15.953843",
+    "text": "hi lets talk",
+    "prediction": "fraudulent",
+    "confidence": 0.9904271364212036,
+    "risk_score": 99.71281409263611,
+    "detected_patterns": [],
+    "fraud_type": "phishing",
+    "model_used": "bert"
   }
 ]
