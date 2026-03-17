@@ -40,5 +40,14 @@ ENV/
 *.model
 *.weights
 backend/fraud_detection_classifier/
-backend/harmful_content_classifier/
 backend/bert_fraud_classifier/
+
+# Bun (not used, using npm)
+bun.lockb
+
+# Test files
+*.test.html
+test.html
+
+# Old documentation (archived)
+docs/*_OLD.md

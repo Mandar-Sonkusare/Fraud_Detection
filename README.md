@@ -1,267 +1,364 @@
-# Social Media Fraud Detection System
+# 🛡️ Social Sentinel AI
 
-## Project Overview
+**Advanced Fraud Detection System Using Deep Learning and NLP**
 
-**Fraudulent and Suspicious Behaviour Detection on Social Media Using NLP and Machine Learning**
+A production-ready fraud detection system that identifies phishing, scams, and fraudulent content in social media messages using a hybrid approach combining rule-based detection, fine-tuned BERT, and traditional machine learning.
 
-This system automatically detects fraudulent activities such as phishing scams, impersonation attacks, fake giveaways, financial fraud promotions, and social engineering attacks on social media platforms using advanced Natural Language Processing and Machine Learning techniques.
+[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![React](https://img.shields.io/badge/React-18.3-61dafb.svg)](https://reactjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.5-3178c6.svg)](https://www.typescriptlang.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-Latest-009688.svg)](https://fastapi.tiangolo.com/)
 
-## Key Features
+---
 
-### 🔍 NLP-Based Text Processing
-- Advanced text cleaning and normalization for social media content
-- Tokenization, stop-word removal, and lemmatization
-- Handling of slang, abbreviations, emojis, and noisy text
-- Multi-language support for fraud detection
+## ✨ Key Features
 
-### 🎯 Fraud-Oriented Content Detection
-- **Phishing Detection**: Identifies messages requesting personal/financial information
-- **Scam Recognition**: Detects fake giveaways and investment fraud schemes
-- **Impersonation Analysis**: Recognizes fake bank, customer care, and public figure accounts
-- **Social Engineering**: Identifies manipulation tactics and trust exploitation
+- **🤖 Hybrid Detection System**: 3-layer approach (Rules + BERT + Traditional ML)
+- **🎯 98.6% F1 Score**: Fine-tuned DistilBERT on real SMS Spam Collection dataset
+- **⚡ Real-time Analysis**: Instant fraud detection with risk scoring (0-100)
+- **📊 6 Fraud Types**: Phishing, Smishing, Spam, Financial Scams, Fake Giveaways, Impersonation
+- **📈 Dynamic Dashboard**: Analytics with charts and statistics
+- **💾 Analysis History**: localStorage persistence with CSV export
+- **🔒 Privacy-Focused**: All processing done locally, no external API calls
 
-### 🤖 Machine Learning Classification
-- TF-IDF and advanced feature extraction techniques
-- Multi-class classification: **Normal**, **Suspicious**, **Fraudulent**
-- Ensemble methods: Logistic Regression, Naive Bayes, Random Forest, SVM
-- Real-time fraud probability scoring
+---
 
-### 📊 Behavioral Fraud Analysis
-- User activity pattern analysis for abnormal behavior detection
-- Mass messaging and repeated scam message identification
-- New account anomaly detection with unusual activity patterns
-- Coordinated fraud campaign recognition
-
-### ⚠️ Fraud Risk Scoring System
-- Comprehensive risk assessment based on:
-  - Textual fraud probability
-  - Keyword and pattern matching
-  - Behavioral anomalies
-  - Account credibility metrics
-- Priority-based investigation queue
-
-### 🔬 Cyber Forensic Support
-- Complete logging and storage of suspicious content
-- Digital evidence preservation for investigations
-- Fraud pattern analysis and reporting
-- Integration with cybercrime investigation workflows
-
-## Applications
-
-### 📱 Social Media Platforms
-- Automated fraud content detection and removal
-- Fake account and coordinated campaign identification
-- User protection from financial scams
-
-### 🚔 Cyber Crime & Forensic Departments
-- Early fraud pattern detection
-- Digital evidence collection and analysis
-- Investigation support tools
-
-### 🏦 Financial Institutions
-- Bank impersonation scam prevention
-- Payment app fraud detection
-- Social engineering attack mitigation
-
-### 🛡️ Public Safety & User Protection
-- Phishing and identity theft prevention
-- Financial and emotional harm reduction
-- Community safety enhancement
-
-### 🏢 Enterprise & Brand Protection
-- Fake promotion and brand impersonation detection
-- Fraudulent advertisement monitoring
-- Brand reputation protection
-
-## Technology Stack
-
-### Frontend
-- **React 18** with TypeScript
-- **Vite** for fast development and building
-- **Tailwind CSS** for modern styling
-- **shadcn/ui** component library
-- **Recharts** for data visualization
-- **React Hook Form** with Zod validation
-
-### Backend
-- **FastAPI** for high-performance APIs
-- **Python 3.x** with async support
-- **Pydantic** for data validation
-- **Uvicorn** ASGI server
-
-### Machine Learning
-- **scikit-learn** for classical ML algorithms
-- **Transformers** for BERT-based models
-- **PyTorch** for deep learning
-- **Pandas/NumPy** for data processing
-- **NLTK/spaCy** for NLP tasks
-
-### Development & Deployment
-- **Docker** containerization
-- **Git** version control
-- **ESLint/Prettier** code quality
-- **Jest** testing framework
-
-## Getting Started
+## 🚀 Quick Start
 
 ### Prerequisites
-- Python 3.8 or higher
-- Node.js 16 or higher
-- npm or yarn
+- Python 3.8+
+- Node.js 16+
+- Git
 
-### Quick Setup (Automated)
-
-**Windows:**
-```bash
-setup.bat
-```
-
-**Mac/Linux:**
-```bash
-chmod +x setup.sh
-./setup.sh
-```
-
-### Manual Installation
+### Installation
 
 ```bash
-# 1. Backend Setup
+# Clone repository
+git clone https://github.com/YOUR_USERNAME/social-sentinel-ai.git
+cd social-sentinel-ai
+
+# Backend setup
 cd backend
 python -m venv venv
-venv\Scripts\activate  # Windows
-# OR
-source venv/bin/activate  # Mac/Linux
+venv\Scripts\activate  # Windows | source venv/bin/activate  # Mac/Linux
 pip install -r requirements.txt
 cd ..
 
-# 2. Frontend Setup
+# Frontend setup
 npm install
+```
 
-# 3. Start Backend (Terminal 1)
+### Run Application
+
+**Terminal 1 - Backend:**
+```bash
 cd backend
-venv\Scripts\activate  # Windows
+venv\Scripts\activate  # Windows | source venv/bin/activate  # Mac/Linux
 python server.py
-# Backend runs on http://localhost:8000
+```
+🟢 Backend: http://localhost:8002
 
-# 4. Start Frontend (Terminal 2)
+**Terminal 2 - Frontend:**
+```bash
 npm run dev
-# Frontend runs on http://localhost:5173
 ```
+🟢 Frontend: http://localhost:3001
 
-### First Time Setup
-Models are already trained and included. If you need to retrain:
-```bash
-cd backend
-python train_fraud_real_datasets.py --mlp_epochs 10
-```
+---
 
-**📖 For detailed setup instructions, see [SETUP_GUIDE.md](SETUP_GUIDE.md)**
+## 🏗️ Architecture
 
-### Training Models
-
-Models are already trained with 25,514 real samples (99.67% accuracy).
-
-If you need to retrain:
-
-```bash
-cd backend
-python train_fraud_real_datasets.py --mlp_epochs 10
-```
-
-This trains 6 models:
-- Logistic Regression
-- Support Vector Machine (SVM) - Best: 99.67%
-- Random Forest
-- Gradient Boosting
-- Naive Bayes
-- Multi-Layer Perceptron (MLP)
-
-Training takes ~2 minutes and automatically selects the best model.
-
-## System Architecture
+### 3-Layer Hybrid Detection System
 
 ```
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   Frontend      │    │   Backend API    │    │  ML Pipeline    │
-│   Dashboard     │◄──►│   FastAPI        │◄──►│  Fraud Models   │
-│   React/TS      │    │   Python         │    │  NLP Engine     │
-└─────────────────┘    └──────────────────┘    └─────────────────┘
-         │                       │                       │
-         ▼                       ▼                       ▼
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   User Input    │    │   Data Storage   │    │  Model Training │
-│   Text Analysis │    │   JSON Logs      │    │  Evaluation     │
-│   Risk Scoring  │    │   Forensic Data  │    │  Optimization   │
-└─────────────────┘    └──────────────────┘    └─────────────────┘
-         │                       │
-         ▼                       ▼
-┌─────────────────┐    ┌──────────────────┐
-│  Behavioral     │    │  Cyber Forensic  │
-│  Analysis       │    │  Support         │
-└─────────────────┘    └──────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│                    User Input (Text)                        │
+└────────────────────┬────────────────────────────────────────┘
+                     │
+         ┌───────────▼───────────┐
+         │   Layer 1: Rules      │  ← 100% Precision for Critical Patterns
+         │   (Credential Theft,  │     (SSN, Crypto Scams, IRS Scams)
+         │    Crypto, IRS)       │
+         └───────────┬───────────┘
+                     │
+         ┌───────────▼───────────┐
+         │   Layer 2: BERT       │  ← Primary Detection (98.6% F1)
+         │   (DistilBERT)        │     Semantic Understanding
+         │   Fine-tuned on       │
+         │   5,572 SMS messages  │
+         └───────────┬───────────┘
+                     │
+         ┌───────────▼───────────┐
+         │   Layer 3: ML         │  ← Fallback (6 Models)
+         │   (SVM, RF, etc.)     │     Traditional ML
+         └───────────┬───────────┘
+                     │
+         ┌───────────▼───────────┐
+         │   Risk Score (0-100)  │
+         │   + Fraud Type        │
+         │   + Patterns          │
+         └───────────────────────┘
 ```
 
-## Fraud Detection Workflow
+---
 
-1. **Text Input**: User submits social media content for analysis
-2. **NLP Preprocessing**: Text is cleaned, tokenized, and normalized
-3. **Pattern Detection**: Fraud-specific keywords and patterns are identified
-4. **ML Classification**: Models classify content as Normal, Suspicious, or Fraudulent
-5. **Behavioral Analysis**: User activity patterns are analyzed for anomalies
-6. **Risk Scoring**: Comprehensive risk score (0-100) is calculated
-7. **Forensic Logging**: All detections are logged for investigation
-8. **Dashboard Display**: Results are displayed with risk classification and patterns
+## 📊 Performance
 
-## API Endpoints
+### BERT Model Metrics
+```
+              precision    recall  f1-score   support
+      normal       0.99      0.99      0.99       969
+  suspicious       0.73      0.85      0.79        13
+  fraudulent       0.95      0.95      0.95       147
 
-### POST `/predict`
+    accuracy                           0.99      1129
+weighted avg       0.99      0.99      0.99      1129
+```
+
+**Training**: 5 epochs (~45 min on CPU) | **Dataset**: 5,572 real SMS messages
+
+### Real-World Testing
+✅ Crypto scams (99% confidence)  
+✅ IRS scams (99% confidence)  
+✅ Phishing (99.38% confidence)  
+✅ Normal messages (86-91% confidence)  
+✅ Suspicious marketing (81% confidence)
+
+---
+
+## 🎯 Fraud Types Detected
+
+| Type | Examples | Detection Method |
+|------|----------|------------------|
+| **Phishing** | Account verification, fake login requests | BERT + Rules |
+| **Smishing** | SMS-based phishing, fake deliveries | BERT |
+| **Spam** | Unwanted promotions, aggressive marketing | BERT + ML |
+| **Financial Scams** | Investment fraud, crypto scams | Rules + BERT |
+| **Fake Giveaways** | Lottery scams, celebrity giveaways | Rules + BERT |
+| **Impersonation** | Fake banks, government agencies | BERT + Rules |
+
+---
+
+## 🔧 Tech Stack
+
+### Backend
+- **FastAPI** - High-performance async API
+- **PyTorch** - Deep learning framework
+- **Transformers** - HuggingFace BERT models
+- **scikit-learn** - Traditional ML algorithms
+- **Uvicorn** - ASGI server
+
+### Frontend
+- **React 18** - UI framework
+- **TypeScript** - Type safety
+- **Vite** - Build tool
+- **Tailwind CSS** - Styling
+- **shadcn/ui** - Component library
+- **Recharts** - Data visualization
+
+---
+
+## 📁 Project Structure
+
+```
+social-sentinel-ai/
+├── backend/
+│   ├── server.py                      # Main API server
+│   ├── train_distilbert.py            # BERT training script
+│   ├── bert_fraud_classifier/         # Fine-tuned BERT model (268MB)
+│   └── fraud_detection_classifier/    # Traditional ML models
+├── src/
+│   ├── pages/                         # React pages
+│   │   ├── Dashboard.tsx              # Analytics dashboard
+│   │   ├── ModerationQueue.tsx        # Main detection interface
+│   │   └── Settings.tsx               # Configuration
+│   ├── components/                    # Reusable components
+│   │   ├── moderation/
+│   │   │   ├── ContentTester.tsx      # Text analysis UI
+│   │   │   └── AnalysisHistory.tsx    # History display
+│   │   └── ui/                        # shadcn/ui components
+│   └── lib/
+│       └── analysisHistory.ts         # localStorage manager
+├── docs/                              # Documentation
+│   ├── SETUP_GUIDE.md                 # Installation guide
+│   ├── PROJECT_DOCUMENTATION.md       # Complete docs
+│   └── FINAL_STATUS.md                # Project status
+└── README.md                          # This file
+```
+
+---
+
+## 📡 API Endpoints
+
+### `POST /predict`
 Analyze text for fraud detection.
 
-**Request:**
 ```json
 {
-  "text": "URGENT: Your account has been suspended. Click here to verify.",
-  "model_name": "mlp",
-  "user_info": {
-    "user_id": "user123",
-    "account_age_days": 5
-  }
+  "text": "URGENT: Your account has been suspended...",
+  "model_name": "bert"
 }
 ```
 
 **Response:**
 ```json
 {
-  "text": "URGENT: Your account has been suspended...",
   "prediction": "fraudulent",
-  "confidence": 0.92,
-  "risk_score": 85.5,
-  "detected_patterns": ["phishing", "impersonation"],
-  "model": "mlp",
-  "model_accuracy": 0.91
+  "confidence": 0.9938,
+  "risk_score": 99.8,
+  "fraud_type": "phishing",
+  "detected_patterns": ["phishing", "urgency"],
+  "model": "bert"
 }
 ```
 
-### GET `/health`
-Check API health and loaded models.
+### `GET /health`
+Check API status and loaded models.
 
-### GET `/stats`
+### `GET /stats`
 Get fraud detection statistics.
 
-### GET `/logs?limit=100`
-Retrieve fraud detection logs for forensic analysis.
+### `GET /logs?limit=100`
+Retrieve forensic logs.
 
-### GET `/behavioral/{user_id}`
-Get behavioral risk profile for a specific user.
+**Full API docs**: http://localhost:8002/docs
 
-## How can I deploy this project?
+---
 
-Simply open [Lovable](https://lovable.dev/projects/b64ea14f-ce49-4992-8344-e8e30b9c4126) and click on Share -> Publish.
+## 🎓 Training Models (Optional)
 
-## Can I connect a custom domain to my Lovable project?
+Models are pre-trained. To retrain:
 
-Yes it is!
+### BERT Model (Recommended)
+```bash
+cd backend
+python train_distilbert.py
+```
+⏱️ ~45 minutes on CPU
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+### Traditional ML Models (Backup)
+```bash
+cd backend
+python train_production_fraud_model.py
+```
+⏱️ ~2 minutes
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+---
+
+## 🧪 Testing
+
+### Quick Test
+1. Open http://localhost:3001
+2. Go to "Fraud Detection" page
+3. Click "Load Fraudulent Sample"
+4. Click "Analyze Content"
+5. Should show: **Fraudulent** (95-100 risk score)
+
+### Test Cases
+```python
+# Fraudulent - Phishing
+"URGENT: Your PayPal account has been suspended. Click here to verify."
+# Expected: Fraudulent (99.38% confidence)
+
+# Fraudulent - Crypto Scam
+"BREAKING: Elon Musk is giving away 5000 BTC! Send 0.1 BTC to claim."
+# Expected: Fraudulent (99% confidence, crypto_scam pattern)
+
+# Normal - Appointment
+"Hi! Your appointment is scheduled for tomorrow at 3 PM."
+# Expected: Normal (86% confidence)
+```
+
+---
+
+## 📈 Improvements Over Previous Version
+
+| Aspect | Before | After |
+|--------|--------|-------|
+| Dataset | Synthetic (15 templates) | Real SMS (5,572 messages) |
+| Model | Traditional ML only | Hybrid (Rules + BERT + ML) |
+| Accuracy | 99.7% (overfitted) | 98.6% (generalized) |
+| Detection | Template matching | Semantic understanding |
+| Crypto scams | ❌ Failed | ✅ Detected |
+| IRS scams | ❌ Failed | ✅ Detected |
+
+---
+
+## 🔒 Security & Privacy
+
+- ✅ All processing done locally
+- ✅ No external API calls
+- ✅ No data sent to third parties
+- ✅ localStorage only (client-side)
+- ✅ Can be deployed on-premise
+- ✅ No PII stored
+
+---
+
+## 📚 Documentation
+
+- **[Setup Guide](docs/SETUP_GUIDE.md)** - Detailed installation instructions
+- **[Project Documentation](docs/PROJECT_DOCUMENTATION.md)** - Complete technical docs
+- **[Final Status](docs/FINAL_STATUS.md)** - Project achievements and status
+
+---
+
+## 🐛 Troubleshooting
+
+### Port Already in Use
+```bash
+# Windows
+netstat -ano | findstr :8002
+taskkill /PID <PID> /F
+
+# Mac/Linux
+lsof -ti:8002 | xargs kill -9
+```
+
+### Missing Dependencies
+```bash
+# Backend
+cd backend
+pip install -r requirements.txt
+
+# Frontend
+rm -rf node_modules package-lock.json
+npm install
+```
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License.
+
+---
+
+## 🎯 Project Status
+
+✅ **Production Ready**  
+✅ **98.6% F1 Score**  
+✅ **Real Dataset Training**  
+✅ **Comprehensive Testing**  
+✅ **Full Documentation**
+
+---
+
+## 📞 Support
+
+For issues or questions:
+1. Check [Setup Guide](docs/SETUP_GUIDE.md)
+2. Review [API Documentation](http://localhost:8002/docs)
+3. Check console logs for errors
+
+---
+
+**Built with ❤️ using React, FastAPI, and DistilBERT**
+
+*Last Updated: March 17, 2026*
