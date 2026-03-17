@@ -1,16 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Bell, LayoutDashboard, Settings, Shield, User, ChevronDown, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Settings, Shield, Menu, X } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 interface NavItemProps {
   to: string;
@@ -48,7 +40,6 @@ interface MainLayoutProps {
 const MainLayout = ({ children }: MainLayoutProps) => {
   const location = useLocation();
   const currentPath = location.pathname;
-  const alertCount = 5;
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
@@ -108,7 +99,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
         </Button>
 
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-gradient-cyber rounded-xl shadow-lg shadow-neon-cyan/40 animate-float">
+          <div className="p-2 bg-gradient-cyber rounded-xl shadow-lg shadow-neon-cyan/40">
             <Shield className="h-6 w-6 text-white" />
           </div>
           <span className="font-bold text-xl gradient-text hidden sm:inline" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
@@ -119,48 +110,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
           </span>
         </div>
         
-        <div className="ml-auto flex items-center gap-4 md:gap-6">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="relative rounded-xl hover:bg-white/10 text-neon-cyan"
-          >
-            <Bell className="h-5 w-5" />
-            {alertCount > 0 && (
-              <Badge className="absolute -top-1 -right-1 px-1.5 h-5 min-w-5 flex items-center justify-center rounded-full text-xs bg-gradient-to-r from-neon-red to-neon-pink text-white border-none shadow-lg shadow-neon-red/50 animate-glow-pulse">
-                {alertCount}
-              </Badge>
-            )}
-          </Button>
-          
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="flex items-center gap-2 md:gap-3 rounded-xl px-2 md:px-4 py-2 hover:bg-white/10">
-                <div className="h-9 w-9 bg-gradient-cyber rounded-xl flex items-center justify-center text-white font-semibold shadow-lg shadow-neon-cyan/30">
-                  AM
-                </div>
-                <span className="font-medium text-white hidden md:inline">Admin</span>
-                <ChevronDown className="h-4 w-4 text-gray-400 hidden md:inline" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56 glass-card border-white/10">
-              <DropdownMenuLabel className="text-white">My Account</DropdownMenuLabel>
-              <DropdownMenuSeparator className="bg-white/10" />
-              <DropdownMenuItem className="text-gray-300 hover:text-white hover:bg-white/10 cursor-pointer">
-                <User className="mr-2 h-4 w-4" />
-                <span>Profile</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem className="text-gray-300 hover:text-white hover:bg-white/10 cursor-pointer">
-                <Settings className="mr-2 h-4 w-4" />
-                <span>Settings</span>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator className="bg-white/10" />
-              <DropdownMenuItem className="text-gray-300 hover:text-white hover:bg-white/10 cursor-pointer">
-                <span>Log out</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+        {/* Removed notification bell and admin profile - not needed for this demo */}
       </header>
       
       <div className="flex flex-1 relative">

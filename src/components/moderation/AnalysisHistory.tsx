@@ -205,7 +205,7 @@ export default function AnalysisHistory() {
                         <Badge className={`${styles.badge} font-semibold px-3 py-1`}>
                           {record.prediction.toUpperCase()}
                         </Badge>
-                        <Badge className="bg-gradient-to-r from-neon-cyan/15 to-neon-purple/15 border border-neon-cyan/30 text-neon-cyan font-medium px-3 py-1">
+                        <Badge className="bg-white/10 border-2 border-white/30 text-white font-semibold px-3 py-1 shadow-lg">
                           {record.fraud_type}
                         </Badge>
                       </div>

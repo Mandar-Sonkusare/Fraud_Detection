@@ -1,20 +1,50 @@
 [
   {
-    "timestamp": "2026-03-17T01:11:53.798784",
-    "text": "Exclusive offer just for you! Buy now and get 50% discount. Offer expires in 24 hours!",
+    "timestamp": "2026-03-17T16:18:14.487029",
+    "text": "URGENT: Your PayPal account has been suspended. Click here immediately to verify your identity: bit.ly/secure-verify",
     "prediction": "fraudulent",
-    "confidence": 0.9998363256454468,
-    "risk_score": 99.9950897693634,
+    "confidence": 0.9938187003135681,
+    "risk_score": 99.81456100940704,
     "detected_patterns": [],
     "fraud_type": "phishing",
     "model_used": "bert"
   },
   {
-    "timestamp": "2026-03-17T01:12:37.390790",
-    "text": "\ud83d\udd25 MEGA BLOWOUT SALE \ud83d\udd25 Everything 90% OFF! Only 3 hours left! Shop now or regret forever! Luxury watches, designer bags, electronics - ALL MUST GO! Don't miss this once-in-a-lifetime opportunity!\n",
+    "timestamp": "2026-03-17T16:18:24.123858",
+    "text": "Your Amazon order #12345 has been confirmed. Expected delivery: Monday, March 20th. Thank you for your purchase!",
+    "prediction": "fraudulent",
+    "confidence": 0.645197331905365,
+    "risk_score": 89.35591995716095,
+    "detected_patterns": [],
+    "fraud_type": "phishing",
+    "model_used": "bert"
+  },
+  {
+    "timestamp": "2026-03-17T16:18:41.313935",
+    "text": "Hi! Your appointment is scheduled for tomorrow at 2 PM. Please arrive 10 minutes early. See you then!",
+    "prediction": "normal",
+    "confidence": 0.8685551285743713,
+    "risk_score": 3.94334614276886,
+    "detected_patterns": [],
+    "fraud_type": "legitimate",
+    "model_used": "bert"
+  },
+  {
+    "timestamp": "2026-03-17T16:18:41.744666",
+    "text": "Thanks for following! Looking forward to connecting with you.",
+    "prediction": "normal",
+    "confidence": 0.9971893429756165,
+    "risk_score": 0.08431971073150635,
+    "detected_patterns": [],
+    "fraud_type": "legitimate",
+    "model_used": "bert"
+  },
+  {
+    "timestamp": "2026-03-17T16:18:42.898314",
+    "text": "LIMITED STOCK! Only 3 items left. Order now to avoid disappointment. Free shipping today only!",
     "prediction": "suspicious",
-    "confidence": 0.9998534917831421,
-    "risk_score": 99.99560475349426,
+    "confidence": 0.8116288781166077,
+    "risk_score": 68.40701073408127,
     "detected_patterns": [
       "aggressive_marketing"
     ],
@@ -22,83 +52,51 @@
     "model_used": "bert"
   },
   {
-    "timestamp": "2026-03-17T01:14:00.559283",
-    "text": "MEGA BLOWOUT SALE! 95% OFF EVERYTHING! Only 2 hours left! Stock running out FAST! Order NOW before it's gone forever! FREE SHIPPING!\n",
-    "prediction": "suspicious",
-    "confidence": 0.9997861981391907,
-    "risk_score": 99.99358594417572,
-    "detected_patterns": [
-      "aggressive_marketing"
-    ],
-    "fraud_type": "spam",
-    "model_used": "bert"
-  },
-  {
-    "timestamp": "2026-03-17T01:14:17.876729",
-    "text": "Reminder: Your dentist appointment with Dr. Johnson is tomorrow at 3:00 PM. Please arrive 10 minutes early. Call 555-0123 to reschedule if needed.\n",
+    "timestamp": "2026-03-17T16:18:58.736661",
+    "text": "Your Amazon order #123456 has shipped! Expected delivery Monday. Track at amazon.com",
     "prediction": "normal",
-    "confidence": 0.9961894154548645,
-    "risk_score": 0.11431753635406494,
+    "confidence": 0.9134801626205444,
+    "risk_score": 2.595595121383667,
     "detected_patterns": [],
     "fraud_type": "legitimate",
     "model_used": "bert"
   },
   {
-    "timestamp": "2026-03-17T01:15:08.327584",
-    "text": "pls scann the QR code and s3nd a paymen7 of 78900 ",
+    "timestamp": "2026-03-17T16:21:39.315813",
+    "text": "hi",
     "prediction": "normal",
-    "confidence": 0.9990309476852417,
-    "risk_score": 0.029071569442749023,
+    "confidence": 0.9990505576133728,
+    "risk_score": 0.028483271598815918,
     "detected_patterns": [],
     "fraud_type": "legitimate",
     "model_used": "bert"
   },
   {
-    "timestamp": "2026-03-17T01:16:29.645762",
-    "text": "pls scann the QR code and s3nd a paymen7 of 78900 and expect a paymen7 off 2789000 in your bank account by evening thx..",
+    "timestamp": "2026-03-17T16:21:54.299609",
+    "text": "your amazon order will arrive today",
+    "prediction": "normal",
+    "confidence": 0.9923822283744812,
+    "risk_score": 0.22853314876556396,
+    "detected_patterns": [],
+    "fraud_type": "legitimate",
+    "model_used": "bert"
+  },
+  {
+    "timestamp": "2026-03-17T16:22:16.226215",
+    "text": "0ngr@ts! Y0u w0n a fr33 pr1ze",
     "prediction": "fraudulent",
-    "confidence": 0.5252723097801208,
-    "risk_score": 85.75816929340363,
+    "confidence": 0.9940231442451477,
+    "risk_score": 99.82069432735443,
     "detected_patterns": [],
     "fraud_type": "phishing",
     "model_used": "bert"
   },
   {
-    "timestamp": "2026-03-17T01:16:42.646928",
-    "text": "pls scann the QR code and s3nd a paymen7 of 78900 ",
-    "prediction": "normal",
-    "confidence": 0.9990309476852417,
-    "risk_score": 0.029071569442749023,
-    "detected_patterns": [],
-    "fraud_type": "legitimate",
-    "model_used": "bert"
-  },
-  {
-    "timestamp": "2026-03-17T13:14:54.213899",
-    "text": "Congratulations! You've been selected to receive a $500 Amazon gift card. Claim now: tinyurl.com/claim-prize",
+    "timestamp": "2026-03-17T16:22:45.118497",
+    "text": "Click this link to claim your prize. https://xxyy.in",
     "prediction": "fraudulent",
-    "confidence": 0.9908238649368286,
-    "risk_score": 99.72471594810486,
-    "detected_patterns": [],
-    "fraud_type": "phishing",
-    "model_used": "bert"
-  },
-  {
-    "timestamp": "2026-03-17T13:15:07.875456",
-    "text": "Reminder: Your dentist appointment with Dr. Johnson is tomorrow at 3:00 PM. Please arrive 10 minutes early. Call 555-0123 to reschedule if needed.\n",
-    "prediction": "normal",
-    "confidence": 0.9961894154548645,
-    "risk_score": 0.11431753635406494,
-    "detected_patterns": [],
-    "fraud_type": "legitimate",
-    "model_used": "bert"
-  },
-  {
-    "timestamp": "2026-03-17T13:15:15.953843",
-    "text": "hi lets talk",
-    "prediction": "fraudulent",
-    "confidence": 0.9904271364212036,
-    "risk_score": 99.71281409263611,
+    "confidence": 0.9622779488563538,
+    "risk_score": 98.86833846569061,
     "detected_patterns": [],
     "fraud_type": "phishing",
     "model_used": "bert"

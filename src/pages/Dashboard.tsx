@@ -192,11 +192,15 @@ export default function Dashboard() {
                 </Pie>
                 <Tooltip 
                   contentStyle={{ 
-                    background: 'rgba(10, 14, 39, 0.95)', 
-                    border: '1px solid rgba(72, 219, 251, 0.3)',
+                    background: 'rgba(255, 255, 255, 0.95)', 
+                    border: '2px solid rgba(72, 219, 251, 0.5)',
                     borderRadius: '8px',
-                    color: '#ffffff'
+                    color: '#000000',
+                    fontWeight: 'bold',
+                    padding: '12px',
+                    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)'
                   }}
+                  labelStyle={{ color: '#000000', fontWeight: 'bold' }}
                 />
               </PieChart>
             </ResponsiveContainer>
@@ -258,18 +262,29 @@ export default function Dashboard() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={fraudTypeData}>
+              <ResponsiveContainer width="100%" height={350}>
+                <BarChart data={fraudTypeData} margin={{ top: 5, right: 30, left: 20, bottom: 80 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.1)" />
-                  <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} stroke="#ffffff" />
+                  <XAxis 
+                    dataKey="name" 
+                    angle={-45} 
+                    textAnchor="end" 
+                    height={120} 
+                    stroke="#ffffff"
+                    interval={0}
+                  />
                   <YAxis stroke="#ffffff" />
                   <Tooltip 
                     contentStyle={{ 
-                      background: 'rgba(10, 14, 39, 0.95)', 
-                      border: '1px solid rgba(255, 107, 107, 0.5)',
+                      background: 'rgba(255, 255, 255, 0.95)', 
+                      border: '2px solid rgba(255, 107, 107, 0.5)',
                       borderRadius: '8px',
-                      color: '#ffffff'
+                      color: '#000000',
+                      fontWeight: 'bold',
+                      padding: '12px',
+                      boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)'
                     }}
+                    labelStyle={{ color: '#000000', fontWeight: 'bold' }}
                   />
                   <Bar dataKey="count" fill="#ff6b6b" radius={[8, 8, 0, 0]} />
                 </BarChart>
@@ -290,18 +305,29 @@ export default function Dashboard() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={patternData}>
+              <ResponsiveContainer width="100%" height={350}>
+                <BarChart data={patternData} margin={{ top: 5, right: 30, left: 20, bottom: 80 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.1)" />
-                  <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} stroke="#ffffff" />
+                  <XAxis 
+                    dataKey="name" 
+                    angle={-45} 
+                    textAnchor="end" 
+                    height={120} 
+                    stroke="#ffffff"
+                    interval={0}
+                  />
                   <YAxis stroke="#ffffff" />
                   <Tooltip 
                     contentStyle={{ 
-                      background: 'rgba(10, 14, 39, 0.95)', 
-                      border: '1px solid rgba(72, 219, 251, 0.5)',
+                      background: 'rgba(255, 255, 255, 0.95)', 
+                      border: '2px solid rgba(72, 219, 251, 0.5)',
                       borderRadius: '8px',
-                      color: '#ffffff'
+                      color: '#000000',
+                      fontWeight: 'bold',
+                      padding: '12px',
+                      boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)'
                     }}
+                    labelStyle={{ color: '#000000', fontWeight: 'bold' }}
                   />
                   <Bar dataKey="count" fill="#48dbfb" radius={[8, 8, 0, 0]} />
                 </BarChart>
